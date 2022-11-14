@@ -17,8 +17,18 @@ type Vault @entity {
   active: Boolean
   pool: Pool
   underlying: Token!
+  "data from sharePriceChangeLog"
   lastShareTimestamp: BigInt!
+  "data from sharePriceChangeLog"
   lastSharePrice: BigInt!
+  apyAutoCompound: BigDecimal!
+  apyAutoCompoundCount: BigInt!
+  apyReward: BigDecimal!
+  apyRewardCount: BigInt!
+  "data from vault events"
+  lastShareTimestamp1: BigInt!
+  "data from vault events"
+  lastSharePrice1: BigInt!
 }
 
 type Strategy @entity {

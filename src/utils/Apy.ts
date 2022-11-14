@@ -23,14 +23,19 @@ export function saveApyAutoCompound(vaultAddress: Address, block: ethereum.Block
     const tryPriceShare = vaultContract.try_getPricePerFullShare()
     if (!tryPriceShare.reverted) {
       const newSharePrice = tryPriceShare.value
-      if (!vault.lastSharePrice.isZero()) {
+      if (!vault.lastSharePrice1.isZero()) {
         const timestamp = block.timestamp
-        const diffSharePrice = newSharePrice.minus(vault.lastSharePrice).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
+        const diffSharePrice = newSharePrice.minus(vault.lastSharePrice1).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
         if (diffSharePrice.gt(BigDecimal.zero())) {
-          const diffTimeStamp = timestamp.minus(vault.lastShareTimestamp)
-          calculateAndSaveApyAutoCompound(`${tx.hash}-${vault.id}`, diffSharePrice, diffTimeStamp, vault.id, block)
-          vault.lastShareTimestamp = timestamp
-          vault.lastSharePrice = newSharePrice
+          const diffTimeStamp = timestamp.minus(vault.lastShareTimestamp1)
+          const apy = calculateAndSaveApyAutoCompound(`${tx.hash}-${vault.id}`, diffSharePrice, diffTimeStamp, vault.id, block)
+          vault.lastShareTimestamp1 = timestamp
+          vault.lastSharePrice1 = newSharePrice
+          if (apy.gt(BigDecimal.zero())) {
+            const apyCount = vault.apyAutoCompoundCount.plus(BigInt.fromI32(1))
+            vault.apyAutoCompound = vault.apyAutoCompound.plus(apy).div(apyCount.toBigDecimal())
+            vault.apyAutoCompoundCount = apyCount
+          }
           vault.save()
         }
       }
@@ -90,6 +95,13 @@ export function saveApyReward(
       apy.createAtBlock = block.number
       apy.priceUnderlying = price
       apy.save()
+
+      if (apy.apy.gt(BigDecimal.zero())) {
+        const countApy = vault.apyRewardCount.plus(BigInt.fromI32(1))
+        vault.apyReward = apy.apy.plus(vault.apyReward).div(countApy.toBigDecimal())
+        vault.apyRewardCount = countApy
+        vault.save()
+      }
     }
   }
 }
@@ -107,7 +119,7 @@ export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigD
     apyAutoCompound.diffTimestamp = diffTimestamp.toBigDecimal()
     apyAutoCompound.save()
   }
-  return apyAutoCompound.apr
+  return apyAutoCompound.apy
 }
 
 export function calculateApr(period: BigDecimal, reward: BigDecimal, tvl: BigDecimal): BigDecimal {

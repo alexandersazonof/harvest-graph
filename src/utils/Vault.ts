@@ -1,4 +1,4 @@
-import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { VaultContract } from "../../generated/templates/VaultListener/VaultContract";
 import { NULL_ADDRESS } from "./Constant";
 import { Vault } from "../../generated/schema";
@@ -46,6 +46,12 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     vault.underlying = loadOrCreateERC20Token(underlying).id
     vault.lastShareTimestamp = BigInt.zero()
     vault.lastSharePrice = BigInt.zero()
+    vault.apyAutoCompound = BigDecimal.zero()
+    vault.apyAutoCompoundCount = BigInt.zero()
+    vault.apyReward = BigDecimal.zero()
+    vault.apyRewardCount = BigInt.zero()
+    vault.lastSharePrice1 = BigInt.zero()
+    vault.lastShareTimestamp1 = BigInt.zero()
     vault.save();
     VaultListener.create(vaultAddress)
   }

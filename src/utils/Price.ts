@@ -52,6 +52,13 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
   }
   const underlyingAddress = vault.underlying
 
+  if (underlyingAddress == NULL_ADDRESS.toHex()) {
+    let price = getPriceForCoin(Address.fromString(vault.id), block)
+    if (!price.isZero()) {
+      return price.divDecimal(BD_18)
+    }
+  }
+
   let price = getPriceForCoin(Address.fromString(underlyingAddress), block)
   if (!price.isZero()) {
     return price.divDecimal(BD_18)

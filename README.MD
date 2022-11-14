@@ -12,7 +12,7 @@
 
 For query use this urls:
 - **Ethereum** - <https://api.thegraph.com/subgraphs/id/QmPRifvkxXjdVMtcFDCd72sLnGE9ZXhg2ep3gNawbSTeVC>
-- **Polygon** - <https://api.thegraph.com/subgraphs/id/Qma7BgwPykQAY28pVsyH3s57gndPiVZKg9rpHA1q4FpDBG>
+- **Polygon** - <https://api.thegraph.com/subgraphs/id/QmWndh2Qz99GRvSteMXemFDxM7YQiWQsYfcUeXFHQ9c6Hc>
 - **BSC** - TBD
 - **Arbitrum** - TBD
 
