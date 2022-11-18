@@ -92,9 +92,9 @@ export function isPsAddress(address: string): boolean {
 export function getOracleAddress(block: number): Address {
   if (dataSource.network() == 'mainnet') {
     if (block >= 12820106) {
-      return ORACLE_ADDRESS_MAINNET_FIRST
-    } else if (block >= 12015724) {
       return ORACLE_ADDRESS_MAINNET_SECOND
+    } else if (block >= 12015724) {
+      return ORACLE_ADDRESS_MAINNET_FIRST
     }
   } else if (dataSource.network() == 'matic') {
     if (block >= 16841617) {

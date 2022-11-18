@@ -32,6 +32,7 @@ export function handleInitExclusive(call: InitExclusiveCall): void {
     autoStack.createAtBlock = call.block.number
     autoStack.save()
     AutoStakeListner.create(autoStakeAddress)
+    loadOrCreateVault(autoStakeAddress, call.block)
   }
 }
 

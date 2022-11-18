@@ -1,8 +1,8 @@
-import { describe, test, assert } from "matchstick-as/assembly/index";
-import { getPriceForUniswapV3, isLpUniPair, isUniswapV3 } from "../../src/utils/Price";
+import { describe, test, assert, createMockedFunction } from "matchstick-as/assembly/index";
+import { getPriceForCurve, getPriceForUniswapV3, isLpUniPair, isUniswapV3 } from "../../src/utils/Price";
 import { Vault } from "../../generated/schema";
-import { BigDecimal, BigInt } from "@graphprotocol/graph-ts";
-import { isPsAddress } from "../../src/utils/Constant";
+import { Address, BigDecimal, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
+import { DEFAULT_DECIMAL, isPsAddress, NULL_ADDRESS, ORACLE_ADDRESS_MAINNET_SECOND } from "../../src/utils/Constant";
 
 describe('Get price for uniswapV3', () => {
   test('Price by UniV3_WBTC_WETH', () => {
@@ -32,5 +32,85 @@ describe('Get price for uniswapV3', () => {
   test('It is lp', () => {
     const result = isLpUniPair('Uniswap V2')
     assert.assertTrue(result)
+  })
+
+  test('Get price for Curve contract', () => {
+    // CRV:TriCrypto2
+    const address = '0xc4AD29ba4B3c580e6D59105FFf484999997675Ff'
+    const contractAddress = Address.fromString(address)
+    const minterAddress = '0xD51a44d3FaE010294C616388b506AcdA1bfAAE46'
+    const minterContract = Address.fromString(minterAddress)
+
+    createMockedFunction(contractAddress, 'minter', 'minter():(address)')
+      .returns([ethereum.Value.fromAddress(minterContract)])
+
+    createMockedFunction(contractAddress, 'totalSupply', 'totalSupply():(uint256)')
+      .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString('170072949681759705845857'))])
+
+
+    createMockedFunction(minterContract, 'coins', 'coins(uint256):(address)')
+      .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(0))])
+      .returns([ethereum.Value.fromAddress(Address.fromString('0x0000000000000000000000000000000000000001'))])
+
+    createMockedFunction(ORACLE_ADDRESS_MAINNET_SECOND, 'getPrice', 'getPrice(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(Address.fromString('0x0000000000000000000000000000000000000001'))])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromI64(996884286937131371))])
+
+    createMockedFunction(Address.fromString('0x0000000000000000000000000000000000000001'), 'decimals', 'decimals():(uint8)')
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(6))])
+
+    createMockedFunction(minterContract, 'balances', 'balances(uint256):(uint256)')
+      .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(0))])
+      .returns([ethereum.Value.fromSignedBigInt(BigInt.fromI64(47861987269296))])
+
+
+
+    createMockedFunction(minterContract, 'coins', 'coins(uint256):(address)')
+      .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(1))])
+      .returns([ethereum.Value.fromAddress(Address.fromString('0x0000000000000000000000000000000000000002'))])
+
+    createMockedFunction(ORACLE_ADDRESS_MAINNET_SECOND, 'getPrice', 'getPrice(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(Address.fromString('0x0000000000000000000000000000000000000002'))])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('16733712573962761368931'))])
+
+    createMockedFunction(Address.fromString('0x0000000000000000000000000000000000000002'), 'decimals', 'decimals():(uint8)')
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(8))])
+
+    createMockedFunction(minterContract, 'balances', 'balances(uint256):(uint256)')
+      .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(1))])
+      .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString('284051892186'))])
+
+
+
+    createMockedFunction(minterContract, 'coins', 'coins(uint256):(address)')
+      .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(2))])
+      .returns([ethereum.Value.fromAddress(Address.fromString('0x0000000000000000000000000000000000000003'))])
+
+    createMockedFunction(ORACLE_ADDRESS_MAINNET_SECOND, 'getPrice', 'getPrice(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(Address.fromString('0x0000000000000000000000000000000000000003'))])
+      .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString('1214746799533196738459'))])
+
+    createMockedFunction(Address.fromString('0x0000000000000000000000000000000000000003'), 'decimals', 'decimals():(uint8)')
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(18))])
+
+    createMockedFunction(minterContract, 'balances', 'balances(uint256):(uint256)')
+      .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(2))])
+      .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString('39090772957888872553640'))])
+
+    createMockedFunction(minterContract, 'coins', 'coins(uint256):(address)')
+      .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(3))])
+      .returns([ethereum.Value.fromAddress(Address.zero())])
+
+
+    createMockedFunction(contractAddress, 'decimals', 'decimals():(uint256)')
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(18))])
+
+
+
+
+    const block = 15996940
+    const price = getPriceForCurve(address, block)
+    log.log(log.Level.INFO, `price = ${price}`)
+    assert.assertTrue(price.equals(BigDecimal.fromString('839.2321169157461488772447420326583')))
   })
 })

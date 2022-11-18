@@ -25,7 +25,7 @@ import { CurveMinterContract } from "../../generated/templates/VaultListener/Cur
 import { getUniswapPoolV3ByVault } from "./UniswapV3Pool";
 import { UniswapV3PoolContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV3PoolContract";
 import { fetchContractDecimal } from "./ERC20";
-import { pow } from "./Math";
+import { pow, powBI } from "./Math";
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
@@ -116,7 +116,7 @@ export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
   return BigDecimal.zero()
 }
 
-function getPriceForCurve(underlyingAddress: string, block: number): BigDecimal {
+export function getPriceForCurve(underlyingAddress: string, block: number): BigDecimal {
   const curveContract = CurveVaultContract.bind(Address.fromString(underlyingAddress))
   const tryMinter = curveContract.try_minter()
   if (tryMinter.reverted) {
@@ -125,14 +125,19 @@ function getPriceForCurve(underlyingAddress: string, block: number): BigDecimal 
   const minter = CurveMinterContract.bind(tryMinter.value)
   let index = 0
   let tryCoins = minter.try_coins(BigInt.fromI32(index))
-  while (tryCoins.reverted) {
+  while (!tryCoins.reverted) {
+    const coin = tryCoins.value
+    if (coin.equals(Address.zero())) {
+      index = index - 1
+      break
+    }
     index = index + 1
     tryCoins = minter.try_coins(BigInt.fromI32(index))
   }
   const tryDecimals = curveContract.try_decimals()
-  let decimal = BigInt.fromI32(DEFAULT_DECIMAL)
+  let decimal = DEFAULT_DECIMAL
   if (!tryDecimals.reverted) {
-    decimal = tryDecimals.value
+    decimal = tryDecimals.value.toI32()
   } else {
     log.log(log.Level.WARNING, `Can not get decimals for ${underlyingAddress}`)
   }
@@ -155,15 +160,16 @@ function getPriceForCurve(underlyingAddress: string, block: number): BigDecimal 
     } else {
       log.log(log.Level.WARNING, `Can not get decimals for ${token}`)
     }
-    value = value.plus(tokenPrice.times(normalizePrecision(balance, BigInt.fromI32(decimalsTemp)).toBigDecimal().div(BD_18)))
-  }
+    const tempBalance = balance.toBigDecimal().div(pow(BD_TEN, decimalsTemp))
 
-  return value.times(BD_18).div(normalizePrecision(curveContract.totalSupply(), decimal).toBigDecimal())
+    value = value.plus(tokenPrice.times(tempBalance))
+  }
+  return value.times(BD_18).div(curveContract.totalSupply().toBigDecimal())
 }
 
 // amount / (10 ^ 18 / 10 ^ decimal)
-function normalizePrecision(amount: BigInt, decimal: BigInt): BigInt {
-  return amount.div(BI_18.div(BigInt.fromI64(10 ** decimal.toI64())))
+function normalizePrecision(amount: BigInt, decimal: number): BigInt {
+  return amount.div(BI_18.div(powBI(BigInt.fromI32(10), decimal)))
 }
 
 function getPriceLpUniPair(underlyingAddress: string, block: number): BigDecimal {

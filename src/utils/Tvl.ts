@@ -4,6 +4,7 @@ import { fetchContractDecimal, fetchContractTotalSupply } from "./ERC20";
 import { getPriceByVault, getPriceForCoin } from "./Price";
 import { BD_18, BD_ZERO, BI_18, SECONDS_OF_YEAR, YEAR_PERIOD } from "./Constant";
 import { fetchPricePerFullShare } from "./Vault";
+import { pow } from "./Math";
 
 export function createTvl(address: Address, transaction: ethereum.Transaction, block: ethereum.Block): void {
   const vaultAddress = address;
@@ -46,7 +47,7 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal): BigDe
   }
   const totalSupply = fetchContractTotalSupply(vaultAddress).toBigDecimal()
   const decimal = fetchContractDecimal(vaultAddress)
-  const tempDecimal = BigDecimal.fromString((10 ** decimal.toI64()).toString())
+  const tempDecimal = pow(BigDecimal.fromString('10'), decimal.toI32())
   const sharePriceDivDecimal = fetchPricePerFullShare(vaultAddress).toBigDecimal().div(tempDecimal)
 
   return totalSupply.div(tempDecimal).times(price).times(sharePriceDivDecimal)

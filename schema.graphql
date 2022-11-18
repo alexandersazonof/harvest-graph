@@ -25,10 +25,6 @@ type Vault @entity {
   apyAutoCompoundCount: BigInt!
   apyReward: BigDecimal!
   apyRewardCount: BigInt!
-  "data from vault events"
-  lastShareTimestamp1: BigInt!
-  "data from vault events"
-  lastSharePrice1: BigInt!
 }
 
 type Strategy @entity {
@@ -132,7 +128,6 @@ type ApyAutoCompound @entity {
   apy: BigDecimal!
   apr: BigDecimal!
   diffSharePrice: BigDecimal!
-  diffTimestamp: BigDecimal!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }

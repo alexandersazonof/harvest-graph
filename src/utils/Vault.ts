@@ -1,10 +1,11 @@
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { VaultContract } from "../../generated/templates/VaultListener/VaultContract";
-import { NULL_ADDRESS } from "./Constant";
+import { DEFAULT_DECIMAL, NULL_ADDRESS } from "./Constant";
 import { Vault } from "../../generated/schema";
 import { fetchContractDecimal, fetchContractName, fetchContractSymbol } from "./ERC20";
 import { loadOrCreateERC20Token } from "./Token";
 import { VaultListener } from "../../generated/templates";
+import { powBI } from "./Math";
 
 
 export function fetchUnderlyingAddress(address: Address): Address {
@@ -20,13 +21,14 @@ export function fetchUnderlyingAddress(address: Address): Address {
 export function fetchPricePerFullShare(address: Address): BigInt {
   const vault = VaultContract.bind(address)
   const tryGetPricePerFullShare = vault.try_getPricePerFullShare()
+  const decimal = vault.try_decimals().reverted ? DEFAULT_DECIMAL : vault.decimals()
   if (tryGetPricePerFullShare.reverted) {
-    return BigInt.fromI32(10 ** vault.decimals())
+    return powBI(BigInt.fromI32(10), decimal)
   }
   const sharePrice: BigInt = tryGetPricePerFullShare.value
   // in some cases ppfs == 0
   if (sharePrice.le(BigInt.zero())) {
-    return BigInt.fromI32(10 ** vault.decimals())
+    return powBI(BigInt.fromI32(10), decimal)
   }
   return sharePrice
 }
@@ -50,8 +52,6 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     vault.apyAutoCompoundCount = BigInt.zero()
     vault.apyReward = BigDecimal.zero()
     vault.apyRewardCount = BigInt.zero()
-    vault.lastSharePrice1 = BigInt.zero()
-    vault.lastShareTimestamp1 = BigInt.zero()
     vault.save();
     VaultListener.create(vaultAddress)
   }
