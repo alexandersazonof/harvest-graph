@@ -150,7 +150,11 @@ export function getPriceForCurve(underlyingAddress: string, block: number): BigD
 
   for (let i=0;i<size;i++) {
     const index = BigInt.fromI32(i)
-    const token = minter.coins(index)
+    const tryCoins1 = minter.try_coins(index)
+    if (tryCoins1.reverted) {
+      break
+    }
+    const token = tryCoins1.value
     const tokenPrice = getPriceForCoin(token, block).divDecimal(BD_18)
     const balance = minter.balances(index)
     const tryDecimalsTemp = ERC20.bind(token).try_decimals()
@@ -205,18 +209,23 @@ function getPriceLpUniPair(underlyingAddress: string, block: number): BigDecimal
     .times(BD_18)
 }
 
-function getPriceForBalancer(underlying: string, block: number): BigDecimal {
+export function getPriceForBalancer(underlying: string, block: number): BigDecimal {
   const balancer = WeightedPool2TokensContract.bind(Address.fromString(underlying))
   const poolId = balancer.getPoolId()
   const totalSupply = balancer.totalSupply()
   const vault = BalancerVaultContract.bind(balancer.getVault())
   const tokenInfo = vault.getPoolTokens(poolId)
 
-  // TODO calc in BD
   let price = BigDecimal.zero()
   for (let i=0;i<tokenInfo.getTokens().length;i++) {
     const tokenPrice = getPriceForCoin(tokenInfo.getTokens()[i], block).divDecimal(BD_18)
-    price = price.plus(price.times(tokenPrice))
+    const tryDecimals = ERC20.bind(tokenInfo.getTokens()[i]).try_decimals()
+    let decimal = DEFAULT_DECIMAL
+    if (!tryDecimals.reverted) {
+      decimal = tryDecimals.value
+    }
+    const balance = normalizePrecision(tokenInfo.getBalances()[i], decimal).toBigDecimal()
+    price = price.plus(balance.times(tokenPrice))
   }
 
   if (price.le(BigDecimal.zero())) {

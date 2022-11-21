@@ -4,8 +4,9 @@ import { DEFAULT_DECIMAL, NULL_ADDRESS } from "./Constant";
 import { Vault } from "../../generated/schema";
 import { fetchContractDecimal, fetchContractName, fetchContractSymbol } from "./ERC20";
 import { loadOrCreateERC20Token } from "./Token";
-import { VaultListener } from "../../generated/templates";
+import { UniswapV3VaultListener, VaultListener } from "../../generated/templates";
 import { powBI } from "./Math";
+import { isUniswapV3 } from "./Price";
 
 
 export function fetchUnderlyingAddress(address: Address): Address {
@@ -52,8 +53,14 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     vault.apyAutoCompoundCount = BigInt.zero()
     vault.apyReward = BigDecimal.zero()
     vault.apyRewardCount = BigInt.zero()
+    if (isUniswapV3(vault.name)) {
+      vault.isUniswapV3 = true
+      UniswapV3VaultListener.create(vaultAddress)
+    } else {
+      vault.isUniswapV3 = false
+      VaultListener.create(vaultAddress)
+    }
     vault.save();
-    VaultListener.create(vaultAddress)
   }
 
   return vault;

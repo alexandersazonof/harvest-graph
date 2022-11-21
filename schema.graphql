@@ -25,6 +25,7 @@ type Vault @entity {
   apyAutoCompoundCount: BigInt!
   apyReward: BigDecimal!
   apyRewardCount: BigInt!
+  isUniswapV3: Boolean
 }
 
 type Strategy @entity {

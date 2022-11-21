@@ -125,31 +125,3 @@ export function calculateApy(apr: BigDecimal): BigDecimal {
     .minus(BD_ONE)
     .times(BD_ONE_HUNDRED)
 }
-
-// TODO Remove if it useless
-// export function saveApyAutoCompound(vaultAddress: Address, block: ethereum.Block, tx: ethereum.Transaction): void {
-//   const vault = Vault.load(vaultAddress.toHex())
-//   if (vault != null) {
-//     const vaultContract = VaultContract.bind(vaultAddress)
-//     const tryPriceShare = vaultContract.try_getPricePerFullShare()
-//     if (!tryPriceShare.reverted) {
-//       const newSharePrice = tryPriceShare.value
-//       if (!vault.lastSharePrice1.isZero()) {
-//         const timestamp = block.timestamp
-//         const diffSharePrice = newSharePrice.minus(vault.lastSharePrice1).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
-//         if (diffSharePrice.gt(BigDecimal.zero())) {
-//           const diffTimeStamp = timestamp.minus(vault.lastShareTimestamp1)
-//           const apy = calculateAndSaveApyAutoCompound(`${tx.hash}-${vault.id}`, diffSharePrice, diffTimeStamp, vault.id, block)
-//           vault.lastShareTimestamp1 = timestamp
-//           vault.lastSharePrice1 = newSharePrice
-//           if (apy.gt(BigDecimal.zero())) {
-//             const apyCount = vault.apyAutoCompoundCount.plus(BigInt.fromI32(1))
-//             vault.apyAutoCompound = vault.apyAutoCompound.plus(apy).div(apyCount.toBigDecimal())
-//             vault.apyAutoCompoundCount = apyCount
-//           }
-//           vault.save()
-//         }
-//       }
-//     }
-//   }
-// }

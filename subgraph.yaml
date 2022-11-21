@@ -66,6 +66,8 @@ dataSources:
           file: ./abis/ERC20.json
         - name: VaultContract
           file: ./abis/Vault.json
+        - name: UniswapV3VaultContract
+          file: ./abis/uniswap/UniswapV3Vault.json
       callHandlers:
         - function: notifyPools(uint256[],address[],uint256)
           handler: handleNotifyPools
@@ -95,6 +97,8 @@ dataSources:
           file: ./abis/ERC20.json
         - name: VaultContract
           file: ./abis/Vault.json
+        - name: UniswapV3VaultContract
+          file: ./abis/uniswap/UniswapV3Vault.json
       callHandlers:
         - function: notifyPools(uint256[],address[],uint256)
           handler: handlePotNotifyPools
@@ -122,6 +126,8 @@ dataSources:
           file: ./abis/ERC20.json
         - name: VaultContract
           file: ./abis/Vault.json
+        - name: UniswapV3VaultContract
+          file: ./abis/uniswap/UniswapV3Vault.json
       callHandlers:
         - function: notifyPools(uint256[],address[],uint256)
           handler: handlePotNotifyPools
@@ -165,6 +171,8 @@ dataSources:
           file: ./abis/curve/CurveMinter.json
         - name: UniswapV3PoolContract
           file: ./abis/uniswap/UniswapV3Pool.json
+        - name: UniswapV3VaultContract
+          file: ./abis/uniswap/UniswapV3Vault.json
       eventHandlers:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded
@@ -206,6 +214,8 @@ templates:
           file: ./abis/curve/CurveMinter.json
         - name: UniswapV3PoolContract
           file: ./abis/uniswap/UniswapV3Pool.json
+        - name: UniswapV3VaultContract
+          file: ./abis/uniswap/UniswapV3Vault.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed
             address,uint256,uint256,uint256)
@@ -244,6 +254,8 @@ templates:
           file: ./abis/curve/CurveMinter.json
         - name: UniswapV3PoolContract
           file: ./abis/uniswap/UniswapV3Pool.json
+        - name: UniswapV3VaultContract
+          file: ./abis/uniswap/UniswapV3Vault.json
       eventHandlers:
         - event: Deposit(indexed address,uint256)
           handler: handleDeposit
@@ -282,6 +294,8 @@ templates:
           file: ./abis/curve/CurveMinter.json
         - name: UniswapV3PoolContract
           file: ./abis/uniswap/UniswapV3Pool.json
+        - name: UniswapV3VaultContract
+          file: ./abis/uniswap/UniswapV3Vault.json
       eventHandlers:
         - event: Staked(indexed address,uint256,uint256,uint256,uint256,uint256)
           handler: handleStaked
@@ -320,6 +334,8 @@ templates:
           file: ./abis/curve/CurveMinter.json
         - name: UniswapV3PoolContract
           file: ./abis/uniswap/UniswapV3Pool.json
+        - name: UniswapV3VaultContract
+          file: ./abis/uniswap/UniswapV3Vault.json
       eventHandlers:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded
@@ -356,8 +372,48 @@ templates:
           file: ./abis/curve/CurveMinter.json
         - name: UniswapV3PoolContract
           file: ./abis/uniswap/UniswapV3Pool.json
+        - name: UniswapV3VaultContract
+          file: ./abis/uniswap/UniswapV3Vault.json
       eventHandlers:
         - event: RewardAdded(address,uint256)
           handler: handleRewardAdded
       file: ./src/PotPoolListener.ts
+    network: mainnet
+  - kind: ethereum/contract
+    name: UniswapV3VaultListener
+    source:
+      abi: UniswapV3VaultContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Vault
+      abis:
+        - name: PotPoolContract
+          file: ./abis/harvest/PotPool.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: VaultContract
+          file: ./abis/Vault.json
+        - name: OracleContract
+          file: ./abis/Oracle.json
+        - name: UniswapV2PairContract
+          file: ./abis/uniswap/UniswapV2Pair.json
+        - name: WeightedPool2TokensContract
+          file: ./abis/balancer/WeightedPool2Tokens.json
+        - name: BalancerVaultContract
+          file: ./abis/balancer/BalancerVault.json
+        - name: CurveVaultContract
+          file: ./abis/curve/CurveVault.json
+        - name: CurveMinterContract
+          file: ./abis/curve/CurveMinter.json
+        - name: UniswapV3PoolContract
+          file: ./abis/uniswap/UniswapV3Pool.json
+        - name: UniswapV3VaultContract
+          file: ./abis/uniswap/UniswapV3Vault.json
+      eventHandlers:
+        - event: SharePriceChangeLiquidation(uint256,uint256,uint256,uint256)
+          handler: handleSharePriceChangeLiquidation
+      file: ./src/UniswapV3VaultListener.ts
     network: mainnet

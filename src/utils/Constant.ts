@@ -3,13 +3,14 @@ import { pow } from "./Math";
 
 export const UNKNOWN = 'unknown';
 
+export const EXCLUSIVE_REWARD_POOL = Address.fromString('0x8f5adC58b32D4e5Ca02EAC0E293D35855999436C')
 export const UNISWAP_V3_VALUE = pow(pow(BigDecimal.fromString('2'), 96), 2)
 export const SECONDS_OF_YEAR = BigDecimal.fromString('31557600');
 export const DEFAULT_DECIMAL = 18;
 export const DEFAULT_PRICE = BigInt.fromI32(0);
 export const YEAR_PERIOD = BigDecimal.fromString('365')
 export const BI_TEN = BigInt.fromI64(10)
-export const BI_18 = BigInt.fromI64(10 ** 18)
+export const BI_18 = BigInt.fromString('1000000000000000000')
 export const BD_18 = BigDecimal.fromString('1000000000000000000')
 export const BD_ZERO = BigDecimal.fromString('0')
 export const BD_ONE = BigDecimal.fromString('1')
@@ -32,6 +33,7 @@ export const STABLE_COIN_ARRAY_MATIC = [
 ]
 
 export const PS_ADDRESSES_MAINNET = [
+  '0x1571ed0bed4d987fe2b498ddbae7dfa19519f651'.toLowerCase(),
   '0xd3093e3efbe00f010e8f5efe3f1cb5d9b7fe0eb1'.toLowerCase(),
   '0x8f5adC58b32D4e5Ca02EAC0E293D35855999436C'.toLowerCase(),
   '0xa0246c9032bc3a600820415ae600c6388619a14d'.toLowerCase(),
@@ -114,3 +116,4 @@ export function getFarmToken(): Address {
   }
   return NULL_ADDRESS
 }
+
