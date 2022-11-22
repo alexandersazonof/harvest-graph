@@ -43,7 +43,7 @@ export function createTvl(address: Address, transaction: ethereum.Transaction, b
 
       const decimal = BigDecimal.fromString((10 ** vault.decimal.toI64()).toString())
 
-      tvl.sharePrice = fetchPricePerFullShare(vaultAddress)
+      tvl.sharePrice = sharePrice
       tvl.sharePriceDivDecimal = BigDecimal.fromString(tvl.sharePrice.toString()).div(decimal)
       tvl.decimal = decimal
 
