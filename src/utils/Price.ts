@@ -97,20 +97,20 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
 
 }
 
+// (token0Balance * token0Price * token1Balance * token1Price) / (liquidity / 10 ** 18)
 export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
   const poolAddress = getUniswapPoolV3ByVault(vault)
   if (!poolAddress.equals(NULL_ADDRESS)) {
     const pool =  UniswapV3PoolContract.bind(poolAddress)
-    const sqrtPriceX96 = pool.slot0().getSqrtPriceX96()
-    const sqrt = pow(sqrtPriceX96.toBigDecimal(), 2)
-    const tokenA = pool.token0()
-    const tokenB = pool.token1()
-    const decimalA = fetchContractDecimal(tokenA)
-    const decimalB = fetchContractDecimal(tokenB)
-    const decimal = pow(BD_TEN, decimalA.toI32()).div(pow(BD_TEN, decimalB.toI32()))
-    const value = sqrt.times(decimal.div(UNISWAP_V3_VALUE))
-    const tokenBPrice = getPriceForCoin(tokenB, block).divDecimal(BD_18)
-    return value.times(tokenBPrice)
+
+    const liquidity = pool.liquidity().divDecimal(BD_18)
+    const token0 = ERC20.bind(pool.token0())
+    const token1 = ERC20.bind(pool.token1())
+    const balanceToken0 = token0.balanceOf(poolAddress).divDecimal(pow(BD_TEN, token0.decimals()))
+    const balanceToken1 = token1.balanceOf(poolAddress).divDecimal(pow(BD_TEN, token1.decimals()))
+    const priceToken0 = getPriceForCoin(token0._address, block).divDecimal(pow(BD_TEN, token0.decimals()))
+    const priceToken1 = getPriceForCoin(token1._address, block).divDecimal(pow(BD_TEN, token1.decimals()))
+    return priceToken0.times(balanceToken0).times(priceToken1.times(balanceToken1)).div(liquidity)
   }
 
   return BigDecimal.zero()

@@ -71,11 +71,12 @@ describe("Apy tests", () => {
   })
 
   test('Calculate apy reward for fUniV3_ORC_WETH', ()=> {
-    const tvlUsd = BigDecimal.fromString('878000')
-    const period = BigDecimal.fromString('201194')
-    const rewardRate = BigDecimal.fromString('73744112398')
+    const tvlUsd = BigDecimal.fromString('1850000')
+    const period = BigDecimal.fromString('86400')
+    const rewardRate = BigDecimal.fromString('70377434163')
     const rewardTokenPrice = BigDecimal.fromString('18')
-    const rewardUsdForPeriod = rewardRate.div(BD_18).times(period).times(rewardTokenPrice)
+    // const rewardUsdForPeriod = rewardRate.div(BD_18).times(period).times(rewardTokenPrice)
+    const rewardUsdForPeriod = BigDecimal.fromString('92')
 
     const apr = calculateApr(period, rewardUsdForPeriod, tvlUsd)
     const apy = calculateApy(apr)

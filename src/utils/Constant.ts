@@ -64,6 +64,7 @@ export const UNISWAP_V3_FEES = [
   '10000'
 ]
 
+export const I_FARM_TOKEN = Address.fromString('0x1571ed0bed4d987fe2b498ddbae7dfa19519f651')
 export const FARM_TOKEN_MAINNET = Address.fromString('0xa0246c9032bc3a600820415ae600c6388619a14d')
 export const FARM_TOKEN_MATIC = Address.fromString('0xab0b2ddb9c7e440fac8e140a89c0dbcbf2d7bbff')
 

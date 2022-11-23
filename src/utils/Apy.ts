@@ -7,7 +7,7 @@ import {
   BD_ONE_HUNDRED,
   BD_TEN,
   BD_ZERO,
-  getFarmToken,
+  getFarmToken, I_FARM_TOKEN,
   isPsAddress,
   SECONDS_OF_YEAR,
   YEAR_PERIOD
@@ -56,7 +56,12 @@ export function saveApyReward(
           apy.rewardForPeriod = rewardRate.divDecimal(BD_18).times(tokenPrice.divDecimal(BD_18)).times(period)
         }
 
-        const tvlUsd = calculateTvlUsd(Address.fromString(vault.id), price)
+        let addressForTvl = Address.fromString(vault.id);
+        if (isPsAddress(pool.vault)) {
+          addressForTvl = I_FARM_TOKEN
+        }
+
+        const tvlUsd = calculateTvlUsd(addressForTvl, price, tx, block)
         apy.tvlUsd = tvlUsd
         const apr = calculateApr(period, apy.rewardForPeriod, tvlUsd)
         if (!(BigDecimal.compare(apr, BD_ZERO) == 0)) {

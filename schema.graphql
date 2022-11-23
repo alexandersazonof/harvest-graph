@@ -56,8 +56,6 @@ type Tvl @entity {
   sharePrice: BigInt!
   timestamp: BigInt!
   createAtBlock: BigInt!
-  sharePriceDivDecimal: BigDecimal!
-  decimal: BigDecimal!
 }
 
 type Pool @entity {
