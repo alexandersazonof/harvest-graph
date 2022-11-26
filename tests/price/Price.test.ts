@@ -1,8 +1,19 @@
 import { describe, test, assert, createMockedFunction } from "matchstick-as/assembly/index";
-import { getPriceForCurve, getPriceForUniswapV3, isLpUniPair, isUniswapV3 } from "../../src/utils/Price";
-import { Vault } from "../../generated/schema";
+import {
+  getPriceForCurve,
+  getPriceForUniswapV3,
+  isLpUniPair,
+  isUniswapV3
+} from "../../src/utils/Price";
+import { UniswapV3Pool, Vault } from "../../generated/schema";
 import { Address, BigDecimal, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
-import { DEFAULT_DECIMAL, isPsAddress, NULL_ADDRESS, ORACLE_ADDRESS_MAINNET_SECOND } from "../../src/utils/Constant";
+import {
+  DEFAULT_DECIMAL,
+  isPsAddress,
+  NULL_ADDRESS,
+  ORACLE_ADDRESS_MAINNET_FIRST,
+  ORACLE_ADDRESS_MAINNET_SECOND
+} from "../../src/utils/Constant";
 
 describe('Get price for uniswapV3', () => {
   test('Price by UniV3_WBTC_WETH', () => {
@@ -105,12 +116,60 @@ describe('Get price for uniswapV3', () => {
     createMockedFunction(contractAddress, 'decimals', 'decimals():(uint256)')
       .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(18))])
 
-
-
-
     const block = 15996940
     const price = getPriceForCurve(address, block)
     log.log(log.Level.INFO, `price = ${price}`)
     assert.assertTrue(price.equals(BigDecimal.fromString('839.2321169157461488772447420326583')))
+  })
+
+  test('Price for UNISWAP 3 ORC-ETH' , () => {
+    const uniswapPool = Address.fromString('0xd43b29aaf8ad938cff4f478a0756defffb329d07')
+    const tokenA = Address.fromString('0x662b67d00a13faf93254714dd601f5ed49ef2f51')
+    const tokenB = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
+
+    const block = 999999999
+    const vault = new Vault('')
+    vault.symbol = 'fUniV3_ORC_WETH'
+
+    const uniswaPoolEntity = new UniswapV3Pool('orc-weth-3000')
+    uniswaPoolEntity.pool = uniswapPool.toHex()
+    uniswaPoolEntity.tokenA = tokenA.toHex()
+    uniswaPoolEntity.tokenB = tokenB.toHex()
+    uniswaPoolEntity.createAtBlock = BigInt.fromString('7787878')
+    uniswaPoolEntity.timestamp = BigInt.fromString('789798')
+    uniswaPoolEntity.save()
+
+    createMockedFunction(uniswapPool, 'liquidity', 'liquidity():(uint128)')
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('56213242337321632152637'))])
+
+    createMockedFunction(uniswapPool, 'token0', 'token0():(address)')
+      .returns([ethereum.Value.fromAddress(tokenA)])
+    createMockedFunction(uniswapPool, 'token1', 'token1():(address)')
+      .returns([ethereum.Value.fromAddress(tokenB)])
+
+    createMockedFunction(tokenA, 'balanceOf', 'balanceOf(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(uniswapPool)])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('6028141645171657933357644'))])
+    createMockedFunction(tokenB, 'balanceOf', 'balanceOf(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(uniswapPool)])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('441541530971877765189'))])
+
+    createMockedFunction(tokenA, 'decimals', 'decimals():(uint8)')
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('18'))])
+    createMockedFunction(tokenB, 'decimals', 'decimals():(uint8)')
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('18'))])
+
+    createMockedFunction(ORACLE_ADDRESS_MAINNET_SECOND, 'getPrice', 'getPrice(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(tokenA)])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('88708358802578239'))])
+    createMockedFunction(ORACLE_ADDRESS_MAINNET_SECOND, 'getPrice', 'getPrice(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(tokenB)])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1187522443081974814423'))])
+
+    const result = getPriceForUniswapV3(vault, block)
+
+    log.log(log.Level.INFO, `price = ${result}`)
+
+    assert.assertTrue(result.equals(BigDecimal.fromString('18.84052556867676493497412934556159')))
   })
 })

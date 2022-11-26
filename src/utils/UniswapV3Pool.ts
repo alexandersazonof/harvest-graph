@@ -1,5 +1,5 @@
 import { UniswapV3Pool, Vault } from "../../generated/schema";
-import { Address } from "@graphprotocol/graph-ts";
+import { Address, log } from "@graphprotocol/graph-ts";
 import { NULL_ADDRESS, UNISWAP_V3_FEES } from "./Constant";
 
 export function getUniswapPoolV3ByVault(vault: Vault): Address {

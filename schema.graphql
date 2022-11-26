@@ -14,7 +14,6 @@ type Vault @entity {
   createAtBlock: BigInt!
   timestamp: BigInt!
   strategy: Strategy
-  active: Boolean
   pool: Pool
   underlying: Token!
   "data from sharePriceChangeLog"

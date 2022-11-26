@@ -48,7 +48,11 @@ export function getPriceForCoin(address: Address, block: number): BigInt {
 export function getPriceByVault(vault: Vault, block: number): BigDecimal {
 
   if (isPsAddress(vault.id)) {
-    return getPriceForCoin(getFarmToken(), block).divDecimal(BD_18)
+    const price = getPriceForCoin(getFarmToken(), block)
+    if (!price.isZero()) {
+      return price.divDecimal(BD_18)
+    }
+    return BigDecimal.zero()
   }
   const underlyingAddress = vault.underlying
 
@@ -103,14 +107,30 @@ export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
   if (!poolAddress.equals(NULL_ADDRESS)) {
     const pool =  UniswapV3PoolContract.bind(poolAddress)
 
-    const liquidity = pool.liquidity().divDecimal(BD_18)
+    const liquidity = pool.liquidity()
     const token0 = ERC20.bind(pool.token0())
     const token1 = ERC20.bind(pool.token1())
-    const balanceToken0 = token0.balanceOf(poolAddress).divDecimal(pow(BD_TEN, token0.decimals()))
-    const balanceToken1 = token1.balanceOf(poolAddress).divDecimal(pow(BD_TEN, token1.decimals()))
-    const priceToken0 = getPriceForCoin(token0._address, block).divDecimal(pow(BD_TEN, token0.decimals()))
-    const priceToken1 = getPriceForCoin(token1._address, block).divDecimal(pow(BD_TEN, token1.decimals()))
-    return priceToken0.times(balanceToken0).times(priceToken1.times(balanceToken1)).div(liquidity)
+    const balanceToken0 = token0.balanceOf(poolAddress)
+    const balanceToken1 = token1.balanceOf(poolAddress)
+    const priceToken0 = getPriceForCoin(token0._address, block)
+    const priceToken1 = getPriceForCoin(token1._address, block)
+    if (priceToken0.isZero()
+      || liquidity.isZero()
+      || token0.decimals() == 0
+      || token1.decimals() == 0
+      || priceToken1.isZero()
+      || balanceToken1.isZero()
+      || balanceToken0.isZero()) {
+      return BigDecimal.zero()
+    }
+    const balance = priceToken0.divDecimal(pow(BD_TEN, token0.decimals()))
+      .times(balanceToken0.divDecimal(pow(BD_TEN, token0.decimals())))
+      .plus(
+        priceToken1.divDecimal(pow(BD_TEN, token1.decimals()))
+          .times(balanceToken1.divDecimal(pow(BD_TEN, token1.decimals()))))
+
+    return balance
+      .div(liquidity.divDecimal(BD_18))
   }
 
   return BigDecimal.zero()

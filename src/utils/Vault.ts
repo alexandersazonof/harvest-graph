@@ -44,7 +44,6 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     const underlying = fetchUnderlyingAddress(vaultAddress)
     vault.createAtBlock = block.number;
     vault.strategy = strategy
-    vault.active = true;
     vault.timestamp = block.timestamp;
     vault.underlying = loadOrCreateERC20Token(underlying).id
     vault.lastShareTimestamp = BigInt.zero()
