@@ -1,12 +1,13 @@
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { VaultContract } from "../../generated/templates/VaultListener/VaultContract";
 import { DEFAULT_DECIMAL, NULL_ADDRESS } from "./Constant";
-import { Vault } from "../../generated/schema";
+import { UserBalance, UserBalanceHistory, UserTransaction, Vault } from "../../generated/schema";
 import { fetchContractDecimal, fetchContractName, fetchContractSymbol } from "./ERC20";
 import { loadOrCreateERC20Token } from "./Token";
 import { UniswapV3VaultListener, VaultListener } from "../../generated/templates";
 import { powBI } from "./Math";
 import { isUniswapV3 } from "./Price";
+import { ERC20 } from "../../generated/Controller/ERC20";
 
 
 export function fetchUnderlyingAddress(address: Address): Address {
@@ -63,4 +64,46 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
   }
 
   return vault;
+}
+
+export function createUserBalance(vaultAddress: Address, amount: BigInt, beneficary: Address, tx: ethereum.Transaction, block: ethereum.Block, isDeposit: boolean): void {
+  const vault = Vault.load(vaultAddress.toHex())
+  const vaultContract = ERC20.bind(vaultAddress)
+  const balance = vaultContract.balanceOf(beneficary)
+  if (vault != null) {
+    const userBalanceId = `${vault.id}-${beneficary.toHex()}`
+    let userBalance = UserBalance.load(userBalanceId)
+    if (userBalance == null) {
+      userBalance = new UserBalance(userBalanceId)
+      userBalance.createAtBlock = block.number
+      userBalance.timestamp = block.timestamp
+      userBalance.vault = vault.id
+      userBalance.value = BigInt.zero()
+      userBalance.userAddress = beneficary.toHex()
+    }
+    userBalance.value = balance
+
+    userBalance.save()
+    const userBalanceHistory = new UserBalanceHistory(`${tx.hash.toHex()}-${beneficary.toHex()}`)
+    userBalanceHistory.createAtBlock = block.number
+    userBalanceHistory.timestamp = block.timestamp
+    userBalanceHistory.userAddress = beneficary.toHex()
+    userBalanceHistory.vault = vault.id
+    userBalanceHistory.transactionType = isDeposit
+      ? 'Deposit'
+      : 'Withdraw'
+    userBalanceHistory.value = amount
+    userBalanceHistory.save()
+
+    const userTransaction = new UserTransaction(tx.hash.toHex())
+    userTransaction.createAtBlock = block.number
+    userTransaction.timestamp = block.timestamp
+    userTransaction.userAddress = beneficary.toHex()
+    userTransaction.vault = vault.id
+    userTransaction.transactionType = isDeposit
+      ? 'Deposit'
+      : 'Withdraw'
+    userTransaction.value = balance
+    userTransaction.save()
+  }
 }

@@ -11,8 +11,11 @@
 ## Queries
 
 For query use this urls:
-- **Ethereum** - <https://api.thegraph.com/subgraphs/id/QmPRifvkxXjdVMtcFDCd72sLnGE9ZXhg2ep3gNawbSTeVC>
-- **Polygon** - <https://api.thegraph.com/subgraphs/id/QmWndh2Qz99GRvSteMXemFDxM7YQiWQsYfcUeXFHQ9c6Hc>
+<https://api.thegraph.com/subgraphs/id/{id}>
+#### ID you can take from dashboard
+
+- **Ethereum** - https://thegraph.com/hosted-service/subgraph/alexandersazonof/harvest
+- **Polygon** - https://thegraph.com/hosted-service/subgraph/alexandersazonof/harvest-matic
 - **BSC** - TBD
 - **Arbitrum** - TBD
 

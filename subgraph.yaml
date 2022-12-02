@@ -173,6 +173,10 @@ dataSources:
           file: ./abis/uniswap/UniswapV3Pool.json
         - name: UniswapV3VaultContract
           file: ./abis/uniswap/UniswapV3Vault.json
+        - name: NotionalToken
+          file: ./abis/notional/nToken.json
+        - name: NotionalOracle
+          file: ./abis/notional/UniswapAnchoredView.json
       eventHandlers:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded
@@ -216,6 +220,10 @@ templates:
           file: ./abis/uniswap/UniswapV3Pool.json
         - name: UniswapV3VaultContract
           file: ./abis/uniswap/UniswapV3Vault.json
+        - name: NotionalToken
+          file: ./abis/notional/nToken.json
+        - name: NotionalOracle
+          file: ./abis/notional/UniswapAnchoredView.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed
             address,uint256,uint256,uint256)
@@ -256,6 +264,10 @@ templates:
           file: ./abis/uniswap/UniswapV3Pool.json
         - name: UniswapV3VaultContract
           file: ./abis/uniswap/UniswapV3Vault.json
+        - name: NotionalToken
+          file: ./abis/notional/nToken.json
+        - name: NotionalOracle
+          file: ./abis/notional/UniswapAnchoredView.json
       eventHandlers:
         - event: Deposit(indexed address,uint256)
           handler: handleDeposit
@@ -296,6 +308,10 @@ templates:
           file: ./abis/uniswap/UniswapV3Pool.json
         - name: UniswapV3VaultContract
           file: ./abis/uniswap/UniswapV3Vault.json
+        - name: NotionalToken
+          file: ./abis/notional/nToken.json
+        - name: NotionalOracle
+          file: ./abis/notional/UniswapAnchoredView.json
       eventHandlers:
         - event: Staked(indexed address,uint256,uint256,uint256,uint256,uint256)
           handler: handleStaked
@@ -336,6 +352,10 @@ templates:
           file: ./abis/uniswap/UniswapV3Pool.json
         - name: UniswapV3VaultContract
           file: ./abis/uniswap/UniswapV3Vault.json
+        - name: NotionalToken
+          file: ./abis/notional/nToken.json
+        - name: NotionalOracle
+          file: ./abis/notional/UniswapAnchoredView.json
       eventHandlers:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded
@@ -374,6 +394,10 @@ templates:
           file: ./abis/uniswap/UniswapV3Pool.json
         - name: UniswapV3VaultContract
           file: ./abis/uniswap/UniswapV3Vault.json
+        - name: NotionalToken
+          file: ./abis/notional/nToken.json
+        - name: NotionalOracle
+          file: ./abis/notional/UniswapAnchoredView.json
       eventHandlers:
         - event: RewardAdded(address,uint256)
           handler: handleRewardAdded
@@ -412,6 +436,10 @@ templates:
           file: ./abis/uniswap/UniswapV3Pool.json
         - name: UniswapV3VaultContract
           file: ./abis/uniswap/UniswapV3Vault.json
+        - name: NotionalToken
+          file: ./abis/notional/nToken.json
+        - name: NotionalOracle
+          file: ./abis/notional/UniswapAnchoredView.json
       eventHandlers:
         - event: SharePriceChangeLiquidation(uint256,uint256,uint256,uint256)
           handler: handleSharePriceChangeLiquidation

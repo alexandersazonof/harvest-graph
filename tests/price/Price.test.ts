@@ -2,7 +2,7 @@ import { describe, test, assert, createMockedFunction } from "matchstick-as/asse
 import {
   getPriceForCurve,
   getPriceForUniswapV3,
-  isLpUniPair,
+  isLpUniPair, isNotional,
   isUniswapV3
 } from "../../src/utils/Price";
 import { UniswapV3Pool, Vault } from "../../generated/schema";
@@ -171,5 +171,10 @@ describe('Get price for uniswapV3', () => {
     log.log(log.Level.INFO, `price = ${result}`)
 
     assert.assertTrue(result.equals(BigDecimal.fromString('18.84052556867676493497412934556159')))
+  })
+
+  test('Is it notional', () => {
+    const result = isNotional('nToken Dai Stablecoin')
+    assert.assertTrue(result)
   })
 })

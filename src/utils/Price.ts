@@ -11,7 +11,7 @@ import {
   DEFAULT_PRICE,
   F_UNI_V3_CONTRACT_NAME, getFarmToken,
   getOracleAddress, isPsAddress, isStableCoin,
-  LP_UNI_PAIR_CONTRACT_NAME,
+  LP_UNI_PAIR_CONTRACT_NAME, NOTIONAL_CONTRACT_NAME, NOTIONAL_ORACLE_ADDRESS,
   NULL_ADDRESS,
   UNISWAP_V3_VALUE,
 } from "./Constant";
@@ -26,6 +26,8 @@ import { getUniswapPoolV3ByVault } from "./UniswapV3Pool";
 import { UniswapV3PoolContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV3PoolContract";
 import { fetchContractDecimal } from "./ERC20";
 import { pow, powBI } from "./Math";
+import { NotionalToken } from "../../generated/templates/VaultListener/NotionalToken";
+import { NotionalOracle } from "../../generated/templates/VaultListener/NotionalOracle";
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
@@ -95,10 +97,33 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
 
       return getPriceForCurve(underlyingAddress, block)
     }
+
+    if (isNotional(underlying.name)) {
+      return getPriceForNotional(underlying, block)
+    }
   }
 
   return BigDecimal.zero()
 
+}
+
+function getPriceForNotional(underlying: Token, block: number): BigDecimal {
+  const notionalContract = NotionalToken.bind(Address.fromString(underlying.id))
+  const tryCurrencyId = notionalContract.try_currencyId()
+  if (tryCurrencyId.reverted) {
+    return BigDecimal.zero()
+  }
+
+  const notionalOracle = NotionalOracle.bind(NOTIONAL_ORACLE_ADDRESS)
+  const cToken = notionalOracle.getTokenConfig(BigInt.fromI32(tryCurrencyId.value)).cToken
+
+  const price = getPriceForCoin(cToken, block)
+
+  if (price.le(BigInt.zero())) {
+    return price.divDecimal(BD_18)
+  }
+
+  return BigDecimal.zero()
 }
 
 // (token0Balance * token0Price * token1Balance * token1Price) / (liquidity / 10 ** 18)
@@ -288,6 +313,13 @@ function isCurve(name: string): boolean {
 
 export function isUniswapV3(name: string): boolean {
   if (name.toLowerCase().startsWith(F_UNI_V3_CONTRACT_NAME)) {
+    return true
+  }
+  return false
+}
+
+export function isNotional(name: string): boolean {
+  if (name.toLowerCase().startsWith(NOTIONAL_CONTRACT_NAME)) {
     return true
   }
   return false
