@@ -1,11 +1,11 @@
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { VaultContract } from "../../generated/templates/VaultListener/VaultContract";
-import { DEFAULT_DECIMAL, NULL_ADDRESS } from "./Constant";
+import { BD_TEN, DEFAULT_DECIMAL, NULL_ADDRESS } from "./Constant";
 import { UserBalance, UserBalanceHistory, UserTransaction, Vault } from "../../generated/schema";
 import { fetchContractDecimal, fetchContractName, fetchContractSymbol } from "./ERC20";
 import { loadOrCreateERC20Token } from "./Token";
 import { UniswapV3VaultListener, VaultListener } from "../../generated/templates";
-import { powBI } from "./Math";
+import { pow, powBI } from "./Math";
 import { isUniswapV3 } from "./Price";
 import { ERC20 } from "../../generated/Controller/ERC20";
 
@@ -68,9 +68,16 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
 
 export function createUserBalance(vaultAddress: Address, amount: BigInt, beneficary: Address, tx: ethereum.Transaction, block: ethereum.Block, isDeposit: boolean): void {
   const vault = Vault.load(vaultAddress.toHex())
-  const vaultContract = ERC20.bind(vaultAddress)
-  const balance = vaultContract.balanceOf(beneficary)
   if (vault != null) {
+    const vaultContract = VaultContract.bind(vaultAddress)
+    const sharePrice = vaultContract.getPricePerFullShare().divDecimal(pow(BD_TEN, vault.decimal.toI32()))
+    let poolBalance = BigDecimal.zero()
+    if (vault.pool != null) {
+      const poolContract = ERC20.bind(Address.fromString(vault.pool!))
+      poolBalance = poolContract.balanceOf(beneficary).toBigDecimal().times(sharePrice)
+    }
+    const vaultBalance = vaultContract.balanceOf(beneficary).toBigDecimal().times(sharePrice)
+    const value = vaultBalance.plus(poolBalance)
     const userBalanceId = `${vault.id}-${beneficary.toHex()}`
     let userBalance = UserBalance.load(userBalanceId)
     if (userBalance == null) {
@@ -78,10 +85,19 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
       userBalance.createAtBlock = block.number
       userBalance.timestamp = block.timestamp
       userBalance.vault = vault.id
-      userBalance.value = BigInt.zero()
+      userBalance.value = BigDecimal.zero()
       userBalance.userAddress = beneficary.toHex()
     }
-    userBalance.value = balance
+    // if (isDeposit) {
+    //   userBalance.value = userBalance.value.plus(amount)
+    // } else {
+    //   const tempValue = userBalance.value.minus(amount)
+    //   userBalance.value = tempValue.lt(BigInt.zero())
+    //     ? BigInt.zero()
+    //     : tempValue
+    // }
+
+    userBalance.value = value
 
     userBalance.save()
     const userBalanceHistory = new UserBalanceHistory(`${tx.hash.toHex()}-${beneficary.toHex()}`)
@@ -92,7 +108,11 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
     userBalanceHistory.transactionType = isDeposit
       ? 'Deposit'
       : 'Withdraw'
-    userBalanceHistory.value = amount
+    userBalanceHistory.value = userBalance.value
+    userBalanceHistory.vaultBalance = vaultBalance
+    userBalanceHistory.poolBalance = poolBalance
+
+    userBalanceHistory.sharePrice = vaultContract.getPricePerFullShare()
     userBalanceHistory.save()
 
     const userTransaction = new UserTransaction(tx.hash.toHex())
@@ -103,7 +123,8 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
     userTransaction.transactionType = isDeposit
       ? 'Deposit'
       : 'Withdraw'
-    userTransaction.value = balance
+    userTransaction.sharePrice = vaultContract.getPricePerFullShare()
+    userTransaction.value = amount
     userTransaction.save()
   }
 }

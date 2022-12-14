@@ -152,7 +152,7 @@ type UserBalance @entity {
   id: ID!
   vault: Vault!
   userAddress: String!
-  value: BigInt!
+  value: BigDecimal!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }
@@ -164,7 +164,10 @@ type UserBalanceHistory @entity {
   transactionType: TransactionType!
   vault: Vault!
   "Amount balance in user address"
-  value: BigInt!
+  value: BigDecimal!
+  vaultBalance: BigDecimal!
+  poolBalance: BigDecimal!
+  sharePrice: BigInt!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }
@@ -177,6 +180,7 @@ type UserTransaction @entity {
   vault: Vault!
   "Amount in transaction"
   value: BigInt!
+  sharePrice: BigInt!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }

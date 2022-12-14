@@ -119,7 +119,7 @@ function getPriceForNotional(underlying: Token, block: number): BigDecimal {
 
   const price = getPriceForCoin(cToken, block)
 
-  if (price.le(BigInt.zero())) {
+  if (price.gt(BigInt.zero())) {
     return price.divDecimal(BD_18)
   }
 

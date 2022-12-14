@@ -273,6 +273,8 @@ templates:
           handler: handleDeposit
         - event: Withdraw(indexed address,uint256)
           handler: handleWithdraw
+        - event: Invest(uint256)
+          handler: handleInvest
       file: ./src/VaultListener.ts
     network: mainnet
   - kind: ethereum/contract
