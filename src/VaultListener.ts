@@ -1,4 +1,5 @@
 import {
+  Approval,
   Deposit,
   Withdraw,
 } from "../generated/templates/VaultListener/VaultContract";
@@ -17,5 +18,9 @@ export function handleWithdraw(event: Withdraw): void {
 }
 
 export function handleInvest(event: Invest): void {
+  createTvl(event.address, event.transaction, event.block)
+}
+
+export function handleApproval(event: Approval): void {
   createTvl(event.address, event.transaction, event.block)
 }

@@ -17,6 +17,8 @@ dataSources:
       abis:
         - name: StorageContract
           file: ./abis/harvest/Storage.json
+        - name: ControllerContract
+          file: ./abis/harvest/Controller.json
       callHandlers:
         - function: setController(address)
           handler: handleSetController
@@ -275,6 +277,8 @@ templates:
           handler: handleWithdraw
         - event: Invest(uint256)
           handler: handleInvest
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
       file: ./src/VaultListener.ts
     network: mainnet
   - kind: ethereum/contract
