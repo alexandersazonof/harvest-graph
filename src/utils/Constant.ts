@@ -45,6 +45,13 @@ export const PS_ADDRESSES_MATIC = [
   '0xab0b2ddb9c7e440fac8e140a89c0dbcbf2d7bbff'.toLowerCase(),
 ]
 
+export const SKIP_APY_REWARD_MAINNET = [
+  // FARMStead USDC-24
+  '0xf6bd560131c1bb8591cf864cdd51817fd5657061'.toLowerCase(),
+  // FARM/GRAIN
+  '0xb9fa44b0911f6d777faab2fa9d8ef103f25ddf49'.toLowerCase()
+]
+
 export const LP_UNI_PAIR_CONTRACT_NAME = [
   '1inch'.toLowerCase(),
   'SushiSwap'.toLowerCase(),
@@ -122,3 +129,9 @@ export function getFarmToken(): Address {
   return NULL_ADDRESS
 }
 
+export function skipCalculateApyReward(address: string): boolean {
+  if (dataSource.network() == 'mainnet') {
+    return SKIP_APY_REWARD_MAINNET.join(' ').includes(address) == true
+  }
+  return false
+}

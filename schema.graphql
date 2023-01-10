@@ -27,6 +27,7 @@ type Vault @entity {
   apyReward: BigDecimal!
   apyRewardCount: BigInt!
   isUniswapV3: Boolean
+  skipFirstApyReward: Boolean
 }
 
 type Strategy @entity {
@@ -154,7 +155,7 @@ type UserBalance @entity {
   id: ID!
   vault: Vault!
   userAddress: String!
-  value: BigInt!
+  value: BigDecimal!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }
@@ -166,7 +167,7 @@ type UserBalanceHistory @entity {
   transactionType: TransactionType!
   vault: Vault!
   "Amount balance in user address"
-  value: BigInt!
+  value: BigDecimal!
 #  vaultBalance: BigDecimal!
 #  poolBalance: BigDecimal!
   sharePrice: BigInt!

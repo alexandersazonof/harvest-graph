@@ -9,12 +9,11 @@ import {
   BD_ZERO,
   getFarmToken, I_FARM_TOKEN,
   isPsAddress,
-  SECONDS_OF_YEAR,
+  SECONDS_OF_YEAR, skipCalculateApyReward,
   YEAR_PERIOD
 } from "./Constant";
 import { calculateTvlUsd } from "./Tvl";
 import { pow } from "./Math";
-import { VaultContract } from "../../generated/Controller/VaultContract";
 
 
 
@@ -31,6 +30,16 @@ export function saveApyReward(
   if (pool != null) {
     let vault = Vault.load(pool.vault)
     if (vault != null) {
+
+      if (skipCalculateApyReward(vault.id)) {
+        return;
+      }
+
+      if (vault.skipFirstApyReward == true) {
+        vault.skipFirstApyReward = false
+        vault.save()
+        return
+      }
 
       let price = BigDecimal.zero()
       if (isPsAddress(pool.vault)) {
@@ -69,6 +78,11 @@ export function saveApyReward(
           apy.apr = apr
           apy.apy = apyValue
         }
+      }
+
+      if (apy.apy.le(BigDecimal.zero())) {
+        // don't save 0 APY
+        return;
       }
       apy.vault = vault.id
       apy.timestamp = block.timestamp

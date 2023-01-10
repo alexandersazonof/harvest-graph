@@ -102,7 +102,61 @@ describe("Apy tests", () => {
     log.log(log.Level.INFO, `rewardUsdForPeriod = ${rewardUsdForPeriod}`)
     log.log(log.Level.INFO, `apr = ${apr}`)
     log.log(log.Level.INFO, `apy = ${apy}`)
-    assert.assertTrue(apr.equals(BigDecimal.fromString('1.816378378378378378378378378378378')))
-    assert.assertTrue(apy.equals(BigDecimal.fromString('1.832928841337900646854755835586')))
+    assert.assertTrue(apr.equals(BigDecimal.fromString('0.01182420625778443393188854489164087')))
+    assert.assertTrue(apy.equals(BigDecimal.fromString('0.0118249034291491860020857311177')))
+  })
+
+  test('Calculate autocompound apr for look', ()=> {
+    const diffSharePrice = BigDecimal.fromString('0.01482913559')
+
+    const diffTimestamp = BigDecimal.fromString('1270908')
+    const apr = calculateAprAutoCompound(diffSharePrice, diffTimestamp)
+    log.log(log.Level.INFO, `apr = ${apr}`)
+    assert.assertTrue(apr.equals(BigDecimal.fromString('36.8218572308132453332577967878084')))
+  })
+
+  test('Calculate autocompound apr for look', ()=> {
+    const diffSharePrice = BigDecimal.fromString('0.015676185')
+
+    const diffTimestamp = BigDecimal.fromString('452364')
+    const apr = calculateAprAutoCompound(diffSharePrice, diffTimestamp)
+    log.log(log.Level.INFO, `apr = ${apr}`)
+    assert.assertTrue(apr.equals(BigDecimal.fromString('109.3594485317133989442130673528398')))
+  })
+
+  test('Calculate apy reward for fUniV3_ORC_WETH 3', ()=> {
+    const tvlUsd = BigDecimal.fromString('1001403')
+    const period = BigDecimal.fromString('592392')
+    const rewardRate = BigDecimal.fromString('53437357791')
+    const rewardTokenPrice = BigDecimal.fromString('0.082')
+    const rewardUsdForPeriod = rewardRate.div(BD_18).times(period).times(rewardTokenPrice)
+    // const rewardUsdForPeriod = BigDecimal.fromString('92')
+
+    const apr = calculateApr(period, rewardUsdForPeriod, tvlUsd)
+    const apy = calculateApy(apr)
+
+    log.log(log.Level.INFO, `rewardUsdForPeriod = ${rewardUsdForPeriod}`)
+    log.log(log.Level.INFO, `apr = ${apr}`)
+    log.log(log.Level.INFO, `apy = ${apy}`)
+    assert.assertTrue(apr.equals(BigDecimal.fromString('0.01182420625778443393188854489164087')))
+    assert.assertTrue(apy.equals(BigDecimal.fromString('0.0118249034291491860020857311177')))
+  })
+
+  test('Calculate apy reward for fUniV3_CNG_WETH', ()=> {
+    const tvlUsd = BigDecimal.fromString('240701')
+    const period = BigDecimal.fromString('592392')
+    const rewardRate = BigDecimal.fromString('53437357791')
+    const rewardTokenPrice = BigDecimal.fromString('0.59')
+    const rewardUsdForPeriod = rewardRate.div(BD_18).times(period).times(rewardTokenPrice)
+    // const rewardUsdForPeriod = BigDecimal.fromString('92')
+
+    const apr = calculateApr(period, rewardUsdForPeriod, tvlUsd)
+    const apy = calculateApy(apr)
+
+    log.log(log.Level.INFO, `rewardUsdForPeriod = ${rewardUsdForPeriod}`)
+    log.log(log.Level.INFO, `apr = ${apr}`)
+    log.log(log.Level.INFO, `apy = ${apy}`)
+    assert.assertTrue(apr.equals(BigDecimal.fromString('0.01182420625778443393188854489164087')))
+    assert.assertTrue(apy.equals(BigDecimal.fromString('0.0118249034291491860020857311177')))
   })
 })

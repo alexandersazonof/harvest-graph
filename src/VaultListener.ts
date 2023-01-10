@@ -4,7 +4,7 @@ import {
   Withdraw,
 } from "../generated/templates/VaultListener/VaultContract";
 import { createTvl } from "./utils/Tvl";
-import { createUserBalance } from "./utils/Vault";
+import { createUserBalance } from "./utils/User";
 import { Invest } from "../generated/Controller/VaultContract";
 
 export function handleDeposit(event: Deposit): void {
