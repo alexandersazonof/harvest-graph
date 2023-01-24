@@ -303,7 +303,7 @@ function isBalancer(name: string): boolean {
   return false
 }
 
-function isCurve(name: string): boolean {
+export function isCurve(name: string): boolean {
   if (name.toLowerCase().startsWith(CURVE_CONTRACT_NAME)) {
     return true
   }

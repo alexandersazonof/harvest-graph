@@ -61,7 +61,7 @@ export const LP_UNI_PAIR_CONTRACT_NAME = [
   'Kyber'.toLowerCase()
 ]
 export const BALANCER_CONTRACT_NAME = 'Balancer'.toLowerCase()
-export const CURVE_CONTRACT_NAME = 'Curve.fi'.toLowerCase()
+export const CURVE_CONTRACT_NAME = 'Curve'.toLowerCase()
 export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
 export const NOTIONAL_CONTRACT_NAME = 'nToken'.toLowerCase()
 
@@ -82,6 +82,7 @@ export const ORACLE_ADDRESS_MAINNET_SECOND = Address.fromString('0x1358c91D5b25D
 export const ORACLE_ADDRESS_MATIC = Address.fromString('0x0E74303d0D18884Ce2CEb3670e72686645c4f38B');
 
 export const NOTIONAL_ORACLE_ADDRESS = Address.fromString('0x65c816077C29b557BEE980ae3cC2dCE80204A0C5')
+export const MEGA_FACTORY_ADDRESS = Address.fromString('0xe1ec9151eb8d9a3451b8f623ce8b62632a6d4f4d')
 
 export const NULL_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000');
 

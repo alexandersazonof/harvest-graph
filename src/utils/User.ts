@@ -27,8 +27,11 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
       userBalance.vault = vault.id
       userBalance.value = BigDecimal.zero()
       userBalance.userAddress = beneficary.toHex()
-      userBalance.additionalValues = [BigDecimal.zero()]
-
+      if (vault.id == I_FARM_TOKEN.toHex()) {
+        userBalance.additionalValues = [BigDecimal.zero(), BigDecimal.zero()]
+      } else {
+        userBalance.additionalValues = [BigDecimal.zero()]
+      }
     }
 
     // if (isDeposit) {
@@ -40,8 +43,14 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
     //     ? value
     //     : tempValue
     // }
-
-    userBalance.value = value
+    if (vault.id  == I_FARM_TOKEN.toHex()) {
+      userBalance.additionalValues = [value, userBalance.additionalValues[1]]
+      userBalance.value = value.plus(
+        userBalance.additionalValues[1]
+      )
+    } else {
+      userBalance.value = value
+    }
 
     userBalance.save()
     const userBalanceHistory = new UserBalanceHistory(`${tx.hash.toHex()}-${beneficary.toHex()}`)
@@ -52,7 +61,8 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
     userBalanceHistory.transactionType = isDeposit
       ? 'Deposit'
       : 'Withdraw'
-    userBalanceHistory.additionalValues = [BigDecimal.zero()]
+
+    userBalanceHistory.additionalValues = userBalance.additionalValues
     userBalanceHistory.value = userBalance.value
 
     userBalanceHistory.sharePrice = vaultContract.getPricePerFullShare()
@@ -72,8 +82,9 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
   }
 }
 
+// only for FARM token
 export function createUserBalanceForFarm(amount: BigInt, beneficary: Address, tx: ethereum.Transaction, block: ethereum.Block, isDeposit: boolean): void {
-  const vault = Vault.load(FARM_TOKEN_MAINNET.toHex())
+  const vault = Vault.load(I_FARM_TOKEN.toHex())
   if (vault != null ) {
     const userBalanceId = `${vault.id}-${beneficary.toHex()}`
     const vaultContract = VaultContract.bind(FARM_TOKEN_MAINNET)
@@ -93,21 +104,25 @@ export function createUserBalanceForFarm(amount: BigInt, beneficary: Address, tx
       userBalance.timestamp = block.timestamp
       userBalance.vault = vault.id
       userBalance.value = BigDecimal.zero()
-      userBalance.additionalValues = [BigDecimal.zero()]
+      userBalance.additionalValues = [BigDecimal.zero(), BigDecimal.zero()]
       userBalance.userAddress = beneficary.toHex()
     }
 
     if (isDeposit) {
-      userBalance.value = userBalance.value.plus(amount.divDecimal(BD_18))
+      const value = userBalance.value.plus(amount.divDecimal(BD_18))
+      userBalance.additionalValues = [userBalance.additionalValues[0], value]
+      userBalance.value = value.plus(userBalance.additionalValues[0])
+
     } else {
       const tempValue = userBalance.value.minus(amount.divDecimal(BD_18))
-
-      userBalance.value = tempValue.lt(BigDecimal.zero())
+      const value = tempValue.lt(BigDecimal.zero())
         ? BigDecimal.zero()
         : tempValue
-    }
-    userBalance.additionalValues = [iFarmBalance, userBalance.value]
+      userBalance.additionalValues = [userBalance.additionalValues[0], value]
 
+      userBalance.value = value.plus(userBalance.additionalValues[0])
+
+    }
     userBalance.save()
 
     const userBalanceHistory = new UserBalanceHistory(`${tx.hash.toHex()}-${beneficary.toHex()}`)
@@ -119,7 +134,7 @@ export function createUserBalanceForFarm(amount: BigInt, beneficary: Address, tx
       ? 'Deposit'
       : 'Withdraw'
     userBalanceHistory.value = userBalance.value
-    userBalanceHistory.additionalValues = [iFarmBalance, userBalance.value]
+    userBalanceHistory.additionalValues = userBalance.additionalValues
     userBalanceHistory.sharePrice = sharePrice
     userBalanceHistory.save()
 

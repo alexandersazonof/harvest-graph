@@ -5,6 +5,7 @@ import { pow, powBI } from "./utils/Math";
 import { BD_TEN, BI_TEN } from "./utils/Constant";
 import { calculateAndSaveApyAutoCompound } from "./utils/Apy";
 import { BigInt } from "@graphprotocol/graph-ts";
+import { loadOrCreateStrategy } from "./utils/Strategy";
 
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
@@ -44,16 +45,8 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
 export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
   const vaultAddress = call.inputs._vault;
   const strategyAddress = call.inputs._strategy;
-  const block = call.block.number;
-  const timestamp = call.block.timestamp;
+  const block = call.block;
 
-  let strategy = Strategy.load(strategyAddress.toHex());
-  if (strategy == null) {
-    strategy = new Strategy(strategyAddress.toHex());
-  }
-  strategy.timestamp = timestamp;
-  strategy.createAtBlock = block;
-  strategy.save();
-
-  loadOrCreateVault(vaultAddress, call.block, strategy.id)
+  loadOrCreateStrategy(strategyAddress, block)
+  loadOrCreateVault(vaultAddress, block, strategyAddress.toHex())
 }

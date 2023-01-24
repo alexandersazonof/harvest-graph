@@ -1,7 +1,7 @@
 import { describe, test, assert, createMockedFunction } from "matchstick-as/assembly/index";
 import {
   getPriceForCurve,
-  getPriceForUniswapV3,
+  getPriceForUniswapV3, isCurve,
   isLpUniPair, isNotional,
   isUniswapV3
 } from "../../src/utils/Price";
@@ -175,6 +175,14 @@ describe('Get price for uniswapV3', () => {
 
   test('Is it notional', () => {
     const result = isNotional('nToken Dai Stablecoin')
+    assert.assertTrue(result)
+  })
+
+
+  test('It is curve', () => {
+    let result = isCurve('Curve CRV-ETH')
+    assert.assertTrue(result)
+    result = isCurve('Curve.fi USDN/3Crv')
     assert.assertTrue(result)
   })
 })
