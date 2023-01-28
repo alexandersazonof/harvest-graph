@@ -4,10 +4,12 @@ import { VaultContract } from "../../generated/templates/VaultListener/VaultCont
 import { ERC20 } from "../../generated/Controller/ERC20";
 import { pow } from "./Math";
 import { BD_18, BD_ONE, BD_TEN, BD_ZERO, BI_18, FARM_TOKEN_MAINNET, FARM_TOKEN_MATIC, I_FARM_TOKEN } from "./Constant";
+import { isIFarm } from "./Price";
 
 export function createUserBalance(vaultAddress: Address, amount: BigInt, beneficary: Address, tx: ethereum.Transaction, block: ethereum.Block, isDeposit: boolean): void {
   const vault = Vault.load(vaultAddress.toHex())
-  if (vault != null) {
+  // for iFarm we fetch in other function
+  if (vault != null && !isIFarm(vault.name)) {
     const vaultContract = VaultContract.bind(vaultAddress)
     const sharePrice = vaultContract.getPricePerFullShare().divDecimal(pow(BD_TEN, vault.decimal.toI32()))
     let poolBalance = BigDecimal.zero()
@@ -78,6 +80,58 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
       : 'Withdraw'
     userTransaction.sharePrice = vaultContract.getPricePerFullShare()
     userTransaction.value = amount
+    userTransaction.save()
+  }
+}
+
+// only for iFarm
+export function createIFarmUserBalance(vaultAddress: Address, beneficary: Address, tx: ethereum.Transaction, block: ethereum.Block): void {
+  const vault = Vault.load(vaultAddress.toHex())
+  if (vault != null) {
+    const vaultContract = VaultContract.bind(vaultAddress)
+    const sharePrice = vaultContract.getPricePerFullShare().divDecimal(pow(BD_TEN, vault.decimal.toI32()))
+
+    const vaultBalance = vaultContract.balanceOf(beneficary).divDecimal(pow(BD_TEN, vault.decimal.toI32())).times(sharePrice)
+
+    const userBalanceId = `${vault.id}-${beneficary.toHex()}`
+    let userBalance = UserBalance.load(userBalanceId)
+    if (userBalance == null) {
+      userBalance = new UserBalance(userBalanceId)
+      userBalance.createAtBlock = block.number
+      userBalance.timestamp = block.timestamp
+      userBalance.vault = vault.id
+      userBalance.value = BigDecimal.zero()
+      userBalance.userAddress = beneficary.toHex()
+      userBalance.additionalValues = [BigDecimal.zero(), BigDecimal.zero()]
+    }
+
+    userBalance.additionalValues = [vaultBalance, userBalance.additionalValues[1]]
+    userBalance.value = vaultBalance.plus(
+      userBalance.additionalValues[1]
+    )
+
+    userBalance.save()
+    const userBalanceHistory = new UserBalanceHistory(`${tx.hash.toHex()}-${beneficary.toHex()}`)
+    userBalanceHistory.createAtBlock = block.number
+    userBalanceHistory.timestamp = block.timestamp
+    userBalanceHistory.userAddress = beneficary.toHex()
+    userBalanceHistory.vault = vault.id
+    userBalanceHistory.transactionType = 'Deposit'
+
+    userBalanceHistory.additionalValues = userBalance.additionalValues
+    userBalanceHistory.value = userBalance.value
+
+    userBalanceHistory.sharePrice = vaultContract.getPricePerFullShare()
+    userBalanceHistory.save()
+
+    const userTransaction = new UserTransaction(tx.hash.toHex())
+    userTransaction.createAtBlock = block.number
+    userTransaction.timestamp = block.timestamp
+    userTransaction.userAddress = beneficary.toHex()
+    userTransaction.vault = vault.id
+    userTransaction.transactionType = 'Deposit'
+    userTransaction.sharePrice = vaultContract.getPricePerFullShare()
+    userTransaction.value = vaultBalance.digits
     userTransaction.save()
   }
 }

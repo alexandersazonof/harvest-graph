@@ -4,9 +4,9 @@ import { BD_TEN, DEFAULT_DECIMAL, NULL_ADDRESS } from "./Constant";
 import { UserBalance, UserBalanceHistory, UserTransaction, Vault } from "../../generated/schema";
 import { fetchContractDecimal, fetchContractName, fetchContractSymbol } from "./ERC20";
 import { loadOrCreateERC20Token } from "./Token";
-import { UniswapV3VaultListener, VaultListener } from "../../generated/templates";
+import { IFarmVaultListener, UniswapV3VaultListener, VaultListener } from "../../generated/templates";
 import { pow, powBI } from "./Math";
-import { isUniswapV3 } from "./Price";
+import { isIFarm, isUniswapV3 } from "./Price";
 import { ERC20 } from "../../generated/Controller/ERC20";
 
 
@@ -60,6 +60,12 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     } else {
       vault.isUniswapV3 = false
       VaultListener.create(vaultAddress)
+    }
+    if (isIFarm(vault.name)) {
+      vault.isIFarm = true
+      IFarmVaultListener.create(vaultAddress)
+    } else {
+      vault.isIFarm = false
     }
     vault.save();
   }

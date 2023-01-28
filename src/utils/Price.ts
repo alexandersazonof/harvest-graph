@@ -10,7 +10,7 @@ import {
   DEFAULT_DECIMAL,
   DEFAULT_PRICE,
   F_UNI_V3_CONTRACT_NAME, getFarmToken,
-  getOracleAddress, isPsAddress, isStableCoin,
+  getOracleAddress, I_FARM_NAME, I_FARM_TOKEN, isPsAddress, isStableCoin,
   LP_UNI_PAIR_CONTRACT_NAME, NOTIONAL_CONTRACT_NAME, NOTIONAL_ORACLE_ADDRESS,
   NULL_ADDRESS,
   UNISWAP_V3_VALUE,
@@ -320,6 +320,13 @@ export function isUniswapV3(name: string): boolean {
 
 export function isNotional(name: string): boolean {
   if (name.toLowerCase().startsWith(NOTIONAL_CONTRACT_NAME)) {
+    return true
+  }
+  return false
+}
+
+export function isIFarm(name: string): boolean {
+  if (name.toLowerCase().startsWith(I_FARM_NAME)) {
     return true
   }
   return false

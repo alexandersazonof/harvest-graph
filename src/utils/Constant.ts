@@ -64,7 +64,7 @@ export const BALANCER_CONTRACT_NAME = 'Balancer'.toLowerCase()
 export const CURVE_CONTRACT_NAME = 'Curve'.toLowerCase()
 export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
 export const NOTIONAL_CONTRACT_NAME = 'nToken'.toLowerCase()
-
+export const I_FARM_NAME = 'iFARM'.toLowerCase()
 
 export const UNISWAP_V3_FEES = [
   '3000',

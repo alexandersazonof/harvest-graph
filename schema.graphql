@@ -27,6 +27,7 @@ type Vault @entity {
   apyReward: BigDecimal!
   apyRewardCount: BigInt!
   isUniswapV3: Boolean
+  isIFarm: Boolean
   skipFirstApyReward: Boolean
 }
 
