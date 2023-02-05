@@ -6,10 +6,10 @@ import { FARM_TOKEN_MAINNET, I_FARM_TOKEN } from "./utils/Constant";
 
 export function handleStaked(event: Staked): void {
   createTvl(event.address, event.transaction, event.block)
-  createUserBalanceForFarm(event.params.amount, event.params.user, event.transaction, event.block, true)
+  createUserBalanceForFarm(event.params.amount, event.params.user, event.transaction, event.block, true, event.address)
 }
 
 export function handleWithdrawn(event: Withdrawn): void {
   createTvl(event.address, event.transaction, event.block)
-  createUserBalanceForFarm(event.params.amount, event.params.user, event.transaction, event.block, false)
+  createUserBalanceForFarm(event.params.amount, event.params.user, event.transaction, event.block, false, event.address)
 }
