@@ -149,7 +149,7 @@ export function createUserBalanceForFarm(amount: BigInt, beneficary: Address, tx
   const vault = Vault.load(I_FARM_TOKEN.toHex())
   if (vault != null ) {
     const userBalanceId = `${vault.id}-${beneficary.toHex()}`
-    const vaultContract = VaultContract.bind(FARM_TOKEN_MAINNET)
+    const vaultContract = VaultContract.bind(I_FARM_TOKEN)
     const trySharePrice = vaultContract.try_getPricePerFullShare()
     const sharePrice = trySharePrice.reverted
       ? BD_18
