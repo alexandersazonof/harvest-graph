@@ -1,7 +1,7 @@
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { Tvl, Vault } from "../../generated/schema";
-import { fetchContractDecimal, fetchContractTotalSupply } from "./ERC20";
-import { getPriceByVault, getPriceForCoin } from "./Price";
+import { fetchContractDecimal, fetchContractTotalSupply } from "../utils/ERC20Utils";
+import { getPriceByVault, getPriceForCoin } from "../utils/PriceUtils";
 import {
   BD_18,
   BD_ZERO,
@@ -9,11 +9,9 @@ import {
   EXCLUSIVE_REWARD_POOL,
   getFarmToken,
   isPsAddress,
-  SECONDS_OF_YEAR,
-  YEAR_PERIOD
-} from "./Constant";
-import { fetchPricePerFullShare } from "./Vault";
-import { pow } from "./Math";
+} from "../utils/Constant";
+import { fetchPricePerFullShare } from "../utils/VaultUtils";
+import { pow } from "../utils/MathUtils";
 
 export function createTvl(address: Address, transaction: ethereum.Transaction, block: ethereum.Block): void {
   const vaultAddress = address;

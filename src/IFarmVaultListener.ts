@@ -1,4 +1,4 @@
-import { createIFarmUserBalance, createUserBalance } from "./utils/User";
+import { createIFarmUserBalance, createUserBalance } from "./types/UserBalance";
 import { Transfer } from "../generated/Controller/ERC20";
 
 export function handleTransfer(event: Transfer): void {

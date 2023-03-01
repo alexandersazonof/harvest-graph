@@ -3,3 +3,5 @@
 /build/
 /.idea/
 /tests/.bin/
+/.DS_Store
+/tests/.DS_Store

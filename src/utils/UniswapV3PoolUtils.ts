@@ -1,12 +1,15 @@
 import { UniswapV3Pool, Vault } from "../../generated/schema";
-import { Address, log } from "@graphprotocol/graph-ts";
+import { Address } from "@graphprotocol/graph-ts";
 import { NULL_ADDRESS, UNISWAP_V3_FEES } from "./Constant";
+
+const SPLITTER = '_'
+const MAX_SYMBOL_SIZE = 3
 
 export function getUniswapPoolV3ByVault(vault: Vault): Address {
 
-  const symbolArray = vault.symbol.split('_')
+  const symbolArray = vault.symbol.split(SPLITTER)
 
-  if (symbolArray.length != 3) {
+  if (symbolArray.length != MAX_SYMBOL_SIZE) {
     return NULL_ADDRESS
   }
 

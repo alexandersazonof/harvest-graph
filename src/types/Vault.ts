@@ -1,43 +1,15 @@
-import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
-import { VaultContract } from "../../generated/templates/VaultListener/VaultContract";
-import { BD_TEN, DEFAULT_DECIMAL, NULL_ADDRESS } from "./Constant";
-import { UserBalance, UserBalanceHistory, UserTransaction, Vault } from "../../generated/schema";
-import { fetchContractDecimal, fetchContractName, fetchContractSymbol } from "./ERC20";
+import { Address, BigDecimal, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
+import { Vault } from "../../generated/schema";
+import { fetchContractDecimal, fetchContractName, fetchContractSymbol } from "../utils/ERC20Utils";
 import { loadOrCreateERC20Token } from "./Token";
 import { IFarmVaultListener, UniswapV3VaultListener, VaultListener } from "../../generated/templates";
-import { pow, powBI } from "./Math";
-import { isIFarm, isUniswapV3 } from "./Price";
-import { ERC20 } from "../../generated/Controller/ERC20";
-
-
-export function fetchUnderlyingAddress(address: Address): Address {
-  const vault = VaultContract.bind(address)
-  const tryUnderlying = vault.try_underlying();
-  if (tryUnderlying.reverted) {
-    return NULL_ADDRESS
-  }
-
-  return tryUnderlying.value
-}
-
-export function fetchPricePerFullShare(address: Address): BigInt {
-  const vault = VaultContract.bind(address)
-  const tryGetPricePerFullShare = vault.try_getPricePerFullShare()
-  const decimal = vault.try_decimals().reverted ? DEFAULT_DECIMAL : vault.decimals()
-  if (tryGetPricePerFullShare.reverted) {
-    return powBI(BigInt.fromI32(10), decimal)
-  }
-  const sharePrice: BigInt = tryGetPricePerFullShare.value
-  // in some cases ppfs == 0
-  if (sharePrice.le(BigInt.zero())) {
-    return powBI(BigInt.fromI32(10), decimal)
-  }
-  return sharePrice
-}
+import { fetchUnderlyingAddress } from "../utils/VaultUtils";
+import { isIFarm, isUniswapV3 } from "../utils/PlatformUtils";
 
 export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, strategy: string = 'unknown'): Vault {
   let vault = Vault.load(vaultAddress.toHex())
   if (vault == null) {
+    log.log(log.Level.INFO, `Create new vault: ${vaultAddress}`)
     vault = new Vault(vaultAddress.toHex());
     vault.name = fetchContractName(vaultAddress)
     vault.decimal = fetchContractDecimal(vaultAddress)

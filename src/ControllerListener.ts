@@ -1,11 +1,12 @@
 import { AddVaultAndStrategyCall, SharePriceChangeLog } from "../generated/Controller/Controller";
-import { SharePrice, Strategy, Vault } from "../generated/schema";
-import { loadOrCreateVault } from "./utils/Vault";
-import { pow, powBI } from "./utils/Math";
-import { BD_TEN, BI_TEN } from "./utils/Constant";
-import { calculateAndSaveApyAutoCompound } from "./utils/Apy";
+import { Vault } from "../generated/schema";
+import { loadOrCreateVault } from "./types/Vault";
+import { pow } from "./utils/MathUtils";
+import { BD_TEN } from "./utils/Constant";
+import { calculateAndSaveApyAutoCompound } from "./types/Apy";
 import { BigInt } from "@graphprotocol/graph-ts";
-import { loadOrCreateStrategy } from "./utils/Strategy";
+import { loadOrCreateStrategy } from "./types/Strategy";
+import { loadOrCreateSharePrice } from "./types/SharePrice";
 
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
@@ -13,14 +14,16 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
   const strategyAddress = event.params.strategy.toHex();
   const block = event.block.number;
   const timestamp = event.block.timestamp;
-  const sharePrice = new SharePrice(`${event.transaction.hash.toHex()}-${vaultAddress}`)
-  sharePrice.vault = vaultAddress;
-  sharePrice.strategy = strategyAddress;
-  sharePrice.oldSharePrice = event.params.oldSharePrice;
-  sharePrice.newSharePrice = event.params.newSharePrice;
-  sharePrice.createAtBlock = block;
-  sharePrice.timestamp = timestamp;
-  sharePrice.save();
+
+  const sharePrice = loadOrCreateSharePrice(
+    `${event.transaction.hash.toHex()}-${vaultAddress}`,
+    event.params.oldSharePrice,
+    event.params.newSharePrice,
+    vaultAddress,
+    strategyAddress,
+    timestamp,
+    block
+  )
 
   const vault = Vault.load(vaultAddress)
   if (vault != null && sharePrice.oldSharePrice != sharePrice.newSharePrice) {

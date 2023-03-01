@@ -1,5 +1,5 @@
 import { NotifyPoolsCall } from "../generated/PotNotifyHelperListener/PotNotifyHelperContract";
-import { loadOrCreatePotPool } from "./utils/PotPool";
+import { loadOrCreatePotPool } from "./types/PotPool";
 
 export function handlePotNotifyPools(call: NotifyPoolsCall): void {
   const pools = call.inputs.pools

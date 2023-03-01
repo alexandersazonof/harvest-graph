@@ -1,6 +1,6 @@
 import { describe, test, assert } from "matchstick-as/assembly/index";
 import { isPsAddress } from "../../src/utils/Constant";
-import { isUniswapV3 } from "../../src/utils/Price";
+import { isUniswapV3 } from "../../src/utils/PlatformUtils";
 
 describe('Utils tests', () => {
   test('Is ps address', () => {

@@ -1,10 +1,10 @@
 import {
   Approval,
-  Deposit, Transfer,
+  Deposit,
   Withdraw,
 } from "../generated/templates/VaultListener/VaultContract";
-import { createTvl } from "./utils/Tvl";
-import { createUserBalance } from "./utils/User";
+import { createTvl } from "./types/Tvl";
+import { createUserBalance } from "./types/UserBalance";
 import { Invest } from "../generated/Controller/VaultContract";
 
 export function handleDeposit(event: Deposit): void {
@@ -24,9 +24,3 @@ export function handleInvest(event: Invest): void {
 export function handleApproval(event: Approval): void {
   createTvl(event.address, event.transaction, event.block)
 }
-
-// export function handleTransfer(event: Transfer): void {
-//   createTvl(event.address, event.transaction, event.block)
-//   createUserBalance(event.address, event.params.value, event.params.to, event.transaction, event.block, true)
-//   createUserBalance(event.address, event.params.value, event.params.from, event.transaction, event.block, false)
-// }

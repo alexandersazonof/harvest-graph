@@ -1,7 +1,7 @@
 import { RewardAdded } from "../generated/PotNotifyHelperListener/PotPoolContract";
 import { PotPoolContract } from "../generated/templates/PotPoolListener/PotPoolContract";
-import { saveReward } from "./utils/Reward";
-import { saveApyReward } from "./utils/Apy";
+import { saveReward } from "./types/Reward";
+import { saveApyReward } from "./types/Apy";
 
 export function handleRewardAdded(event: RewardAdded): void {
   const poolAddress = event.address

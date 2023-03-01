@@ -1,19 +1,16 @@
 import { Address, BigDecimal, BigInt, log } from "@graphprotocol/graph-ts";
 import { OracleContract } from "../../generated/templates/VaultListener/OracleContract";
 import {
-  BALANCER_CONTRACT_NAME,
   BD_18,
   BD_ONE,
   BD_TEN,
   BI_18,
-  CURVE_CONTRACT_NAME,
   DEFAULT_DECIMAL,
   DEFAULT_PRICE,
-  F_UNI_V3_CONTRACT_NAME, getFarmToken,
-  getOracleAddress, I_FARM_NAME, I_FARM_TOKEN, isPsAddress, isStableCoin,
-  LP_UNI_PAIR_CONTRACT_NAME, NOTIONAL_CONTRACT_NAME, NOTIONAL_ORACLE_ADDRESS,
+  getFarmToken,
+  getOracleAddress, isPsAddress, isStableCoin,
+  NOTIONAL_ORACLE_ADDRESS,
   NULL_ADDRESS,
-  UNISWAP_V3_VALUE,
 } from "./Constant";
 import { Token, Vault } from "../../generated/schema";
 import { UniswapV2PairContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV2PairContract";
@@ -22,12 +19,13 @@ import { BalancerVaultContract } from "../../generated/templates/VaultListener/B
 import { ERC20 } from "../../generated/Controller/ERC20";
 import { CurveVaultContract } from "../../generated/templates/VaultListener/CurveVaultContract";
 import { CurveMinterContract } from "../../generated/templates/VaultListener/CurveMinterContract";
-import { getUniswapPoolV3ByVault } from "./UniswapV3Pool";
+import { getUniswapPoolV3ByVault } from "./UniswapV3PoolUtils";
 import { UniswapV3PoolContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV3PoolContract";
-import { fetchContractDecimal } from "./ERC20";
-import { pow, powBI } from "./Math";
+import { fetchContractDecimal } from "./ERC20Utils";
+import { pow, powBI } from "./MathUtils";
 import { NotionalToken } from "../../generated/templates/VaultListener/NotionalToken";
 import { NotionalOracle } from "../../generated/templates/VaultListener/NotionalOracle";
+import { isBalancer, isCurve, isLpUniPair, isNotional, isUniswapV3 } from "./PlatformUtils";
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
@@ -126,7 +124,7 @@ function getPriceForNotional(underlying: Token, block: number): BigDecimal {
   return BigDecimal.zero()
 }
 
-// (token0Balance * token0Price * token1Balance * token1Price) / (liquidity / 10 ** 18)
+// ((token0Balance * token0Price) + (token1Balance * token1Price)) / (liquidity / 10 ** 18)
 export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
   const poolAddress = getUniswapPoolV3ByVault(vault)
   if (!poolAddress.equals(NULL_ADDRESS)) {
@@ -148,10 +146,10 @@ export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
       || balanceToken0.isZero()) {
       return BigDecimal.zero()
     }
-    const balance = priceToken0.divDecimal(pow(BD_TEN, token0.decimals()))
+    const balance = priceToken0.divDecimal(BD_18)
       .times(balanceToken0.divDecimal(pow(BD_TEN, token0.decimals())))
       .plus(
-        priceToken1.divDecimal(pow(BD_TEN, token1.decimals()))
+        priceToken1.divDecimal(BD_18)
           .times(balanceToken1.divDecimal(pow(BD_TEN, token1.decimals()))))
 
     return balance
@@ -284,50 +282,4 @@ export function getPriceForBalancer(underlying: string, block: number): BigDecim
     return price
   }
   return price.div(totalSupply.toBigDecimal())
-}
-
-export function isLpUniPair(name: string): boolean {
-  for (let i=0;i<LP_UNI_PAIR_CONTRACT_NAME.length;i++) {
-    if (name.toLowerCase().startsWith(LP_UNI_PAIR_CONTRACT_NAME[i])) {
-      return true
-    }
-  }
-  return false
-}
-
-function isBalancer(name: string): boolean {
-  if (name.toLowerCase().startsWith(BALANCER_CONTRACT_NAME)) {
-    return true
-  }
-
-  return false
-}
-
-export function isCurve(name: string): boolean {
-  if (name.toLowerCase().startsWith(CURVE_CONTRACT_NAME)) {
-    return true
-  }
-
-  return false
-}
-
-export function isUniswapV3(name: string): boolean {
-  if (name.toLowerCase().startsWith(F_UNI_V3_CONTRACT_NAME)) {
-    return true
-  }
-  return false
-}
-
-export function isNotional(name: string): boolean {
-  if (name.toLowerCase().startsWith(NOTIONAL_CONTRACT_NAME)) {
-    return true
-  }
-  return false
-}
-
-export function isIFarm(name: string): boolean {
-  if (name.toLowerCase().startsWith(I_FARM_NAME)) {
-    return true
-  }
-  return false
 }

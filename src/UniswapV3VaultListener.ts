@@ -1,23 +1,39 @@
 import { SharePriceChangeLiquidation } from "../generated/PotNotifyHelperListener/UniswapV3VaultContract";
-import { calculateAndSaveApyAutoCompound } from "./utils/Apy";
+import { calculateAndSaveApyAutoCompound } from "./types/Apy";
 import { Vault } from "../generated/schema";
-import { BD_TEN } from "./utils/Constant";
-import { pow } from "./utils/Math";
+import { BD_TEN, NULL_ADDRESS } from "./utils/Constant";
+import { pow } from "./utils/MathUtils";
+import { loadOrCreateSharePrice } from "./types/SharePrice";
 
 export function handleSharePriceChangeLiquidation(event: SharePriceChangeLiquidation): void {
-  const diffSharePrice = event.params.newPrice.minus(event.params.oldPrice)
-  const diffTimestamp = event.params.newTimestamp.minus(event.params.previousTimestamp)
   const address = event.address
+  const oldSharePrice = event.params.oldPrice
+  const newSharePrice = event.params.newPrice;
+  const block = event.block.number;
+  const timestamp = event.block.timestamp;
+
+
+  const diffSharePrice = newSharePrice.minus(oldSharePrice)
+  const diffTimestamp = event.params.newTimestamp.minus(event.params.previousTimestamp)
   const vault = Vault.load(address.toHex())
   if (vault != null) {
     if (!vault.lastShareTimestamp.isZero()) {
-      const sharePrice = diffSharePrice.divDecimal(pow(BD_TEN, vault.decimal.toI32()))
-      const apy = calculateAndSaveApyAutoCompound(`${event.transaction.hash.toHex()}-${vault.id}`, sharePrice, diffTimestamp, address.toHex(), event.block)
-
+      const sharePriceNumber = diffSharePrice.divDecimal(pow(BD_TEN, vault.decimal.toI32()))
+      const apy = calculateAndSaveApyAutoCompound(`${event.transaction.hash.toHex()}-${vault.id}`, sharePriceNumber, diffTimestamp, address.toHex(), event.block)
     }
 
     vault.lastSharePrice = event.params.newPrice
     vault.lastShareTimestamp = event.params.newTimestamp
     vault.save()
+
+    const sharePrice = loadOrCreateSharePrice(
+      `${event.transaction.hash.toHex()}-${address.toHex()}`,
+      oldSharePrice,
+      newSharePrice,
+      vault.id,
+      vault.strategy,
+      timestamp,
+      block
+    )
   }
 }

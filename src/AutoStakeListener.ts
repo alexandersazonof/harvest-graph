@@ -1,8 +1,6 @@
-import { Deposit, Withdraw } from "../generated/templates/VaultListener/VaultContract";
-import { createTvl } from "./utils/Tvl";
+import { createTvl } from "./types/Tvl";
 import { Staked, Withdrawn } from "../generated/ExclusiveRewardPoolListener/ExclusiveRewardPoolContract";
-import { createUserBalance, createUserBalanceForFarm } from "./utils/User";
-import { FARM_TOKEN_MAINNET, I_FARM_TOKEN } from "./utils/Constant";
+import { createUserBalanceForFarm } from "./types/UserBalance";
 
 export function handleStaked(event: Staked): void {
   createTvl(event.address, event.transaction, event.block)

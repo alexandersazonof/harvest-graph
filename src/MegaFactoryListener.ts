@@ -1,8 +1,8 @@
 import { DeploymentCompleted, MegaFactoryContract } from "../generated/MegaFactory/MegaFactoryContract";
-import { loadOrCreateStrategy } from "./utils/Strategy";
-import { loadOrCreateVault } from "./utils/Vault";
+import { loadOrCreateStrategy } from "./types/Strategy";
+import { loadOrCreateVault } from "./types/Vault";
 import { MEGA_FACTORY_ADDRESS } from "./utils/Constant";
-import { loadOrCreatePotPool } from "./utils/PotPool";
+import { loadOrCreatePotPool } from "./types/PotPool";
 
 
 export function handleDeploymentCompleted(event: DeploymentCompleted): void {

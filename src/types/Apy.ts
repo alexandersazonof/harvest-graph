@@ -1,19 +1,15 @@
 import { ApyAutoCompound, ApyReward, Pool, Vault } from "../../generated/schema";
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
-import { getPriceByVault, getPriceForCoin } from "./Price";
+import { getPriceByVault, getPriceForCoin } from "../utils/PriceUtils";
 import {
   BD_18,
-  BD_ONE,
-  BD_ONE_HUNDRED,
-  BD_TEN,
   BD_ZERO,
   getFarmToken, I_FARM_TOKEN,
   isPsAddress,
-  SECONDS_OF_YEAR, skipCalculateApyReward,
-  YEAR_PERIOD
-} from "./Constant";
+  skipCalculateApyReward,
+} from "../utils/Constant";
 import { calculateTvlUsd } from "./Tvl";
-import { pow } from "./Math";
+import { calculateApr, calculateAprAutoCompound, calculateApy } from "../utils/ApyUtils";
 
 
 
@@ -113,34 +109,4 @@ export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigD
     apyAutoCompound.save()
   }
   return apyAutoCompound.apy
-}
-
-export function calculateApr(period: BigDecimal, reward: BigDecimal, tvl: BigDecimal): BigDecimal {
-  if (BigDecimal.compare(BD_ZERO, tvl) == 0 || BigDecimal.compare(reward, BD_ZERO) == 0) {
-    return BD_ZERO
-  }
-  const ratio = SECONDS_OF_YEAR.div(period);
-  const tempValue = reward.div(tvl)
-  return tempValue.times(ratio).times(BD_ONE_HUNDRED)
-}
-
-export function calculateAprAutoCompound(diffSharePrice: BigDecimal, diffTimestamp: BigDecimal): BigDecimal {
-  if (diffTimestamp.equals(BigDecimal.zero()) || diffTimestamp.equals(BigDecimal.zero())) {
-    return BigDecimal.zero()
-  }
-  return diffSharePrice.div(diffTimestamp).times(BD_ONE_HUNDRED).times(SECONDS_OF_YEAR)
-}
-
-export function calculateApy(apr: BigDecimal): BigDecimal {
-  if (BigDecimal.compare(BD_ZERO, apr) == 0) {
-    return apr
-  }
-  let tempValue: BigDecimal = apr.div(BD_ONE_HUNDRED)
-    .div(YEAR_PERIOD)
-    .plus(BD_ONE);
-
-  tempValue = pow(tempValue, 365)
-  return tempValue
-    .minus(BD_ONE)
-    .times(BD_ONE_HUNDRED)
 }

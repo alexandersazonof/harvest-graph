@@ -6,7 +6,7 @@ import {
   NotifyPoolsCall,
   NotifyPoolsIncludingProfitShareCall
 } from "../generated/NoMintNotifyHelperListener/NotifyHelperContract";
-import { loadOrCreateNoMintPool } from "./utils/NoMintRewardPool";
+import { loadOrCreateNoMintPool } from "./types/NoMintRewardPool";
 
 export function handleNotifyPools(call: NotifyPoolsCall): void {
   let pools = call.inputs.pools

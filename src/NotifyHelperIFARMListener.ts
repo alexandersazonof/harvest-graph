@@ -1,4 +1,4 @@
-import { loadOrCreatePotPool } from "./utils/PotPool";
+import { loadOrCreatePotPool } from "./types/PotPool";
 import { NotifyPoolsCall } from "../generated/NotifyHelperIFARMListener/NotifyHelperIFARMContract";
 
 export function handlePotNotifyPools(call: NotifyPoolsCall): void {

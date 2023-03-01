@@ -2,10 +2,11 @@ import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { AutoStake, UserBalance, UserBalanceHistory, UserTransaction, Vault } from "../../generated/schema";
 import { VaultContract } from "../../generated/templates/VaultListener/VaultContract";
 import { ERC20 } from "../../generated/Controller/ERC20";
-import { pow } from "./Math";
-import { BD_18, BD_ONE, BD_TEN, BD_ZERO, BI_18, FARM_TOKEN_MAINNET, FARM_TOKEN_MATIC, I_FARM_TOKEN } from "./Constant";
-import { isIFarm } from "./Price";
+import { pow } from "../utils/MathUtils";
+import { BD_18, BD_ONE, BD_TEN, BD_ZERO, BI_18, FARM_TOKEN_MAINNET, FARM_TOKEN_MATIC, I_FARM_TOKEN } from "../utils/Constant";
 import { AutoStakeContract } from "../../generated/templates/AutoStake/AutoStakeContract";
+import { isIFarm } from "../utils/PlatformUtils";
+import { getTransactionType, UNKNOWN_TRANSACTION_TYPE } from "../utils/UserBalanceUtils";
 
 export function createUserBalance(vaultAddress: Address, amount: BigInt, beneficary: Address, tx: ethereum.Transaction, block: ethereum.Block, isDeposit: boolean): void {
   const vault = Vault.load(vaultAddress.toHex())
@@ -41,15 +42,6 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
       }
     }
 
-    // if (isDeposit) {
-    //   userBalance.value = userBalance.value.plus(amount)
-    // } else {
-    //   const tempValue = userBalance.value.minus(amount)
-    //
-    //   userBalance.value = tempValue.lt(BigInt.zero())
-    //     ? value
-    //     : tempValue
-    // }
     if (vault.id  == I_FARM_TOKEN.toHex()) {
       userBalance.additionalValues = [value, userBalance.additionalValues[1]]
       userBalance.value = value.plus(
@@ -60,32 +52,18 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
     }
 
     userBalance.save()
-    const userBalanceHistory = new UserBalanceHistory(`${tx.hash.toHex()}-${beneficary.toHex()}`)
-    userBalanceHistory.createAtBlock = block.number
-    userBalanceHistory.timestamp = block.timestamp
-    userBalanceHistory.userAddress = beneficary.toHex()
-    userBalanceHistory.vault = vault.id
-    userBalanceHistory.transactionType = isDeposit
-      ? 'Deposit'
-      : 'Withdraw'
 
-    userBalanceHistory.additionalValues = userBalance.additionalValues
-    userBalanceHistory.value = userBalance.value
+    const userBalanceHistoryId = `${tx.hash.toHex()}-${beneficary.toHex()}`
+    const userTransactionId = tx.hash.toHex();
+    const createdAtBlock = block.number
+    const timestamp = block.timestamp
+    const userAddress = beneficary.toHex()
+    const vaultAddressString = vault.id
+    const transactionType = getTransactionType(isDeposit)
 
-    userBalanceHistory.sharePrice = sharePrice
-    userBalanceHistory.save()
+    createBalanceHistory(userBalanceHistoryId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, userBalance.value, userBalance.additionalValues)
+    createUserTransaction(userTransactionId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, amount)
 
-    const userTransaction = new UserTransaction(tx.hash.toHex())
-    userTransaction.createAtBlock = block.number
-    userTransaction.timestamp = block.timestamp
-    userTransaction.userAddress = beneficary.toHex()
-    userTransaction.vault = vault.id
-    userTransaction.transactionType = isDeposit
-      ? 'Deposit'
-      : 'Withdraw'
-    userTransaction.sharePrice = sharePrice
-    userTransaction.value = amount
-    userTransaction.save()
   }
 }
 
@@ -119,28 +97,19 @@ export function createIFarmUserBalance(vaultAddress: Address, beneficary: Addres
     )
 
     userBalance.save()
-    const userBalanceHistory = new UserBalanceHistory(`${tx.hash.toHex()}-${beneficary.toHex()}`)
-    userBalanceHistory.createAtBlock = block.number
-    userBalanceHistory.timestamp = block.timestamp
-    userBalanceHistory.userAddress = beneficary.toHex()
-    userBalanceHistory.vault = vault.id
-    userBalanceHistory.transactionType = 'Deposit'
 
-    userBalanceHistory.additionalValues = userBalance.additionalValues
-    userBalanceHistory.value = userBalance.value
 
-    userBalanceHistory.sharePrice = sharePrice
-    userBalanceHistory.save()
+    const userBalanceHistoryId = `${tx.hash.toHex()}-${beneficary.toHex()}`
+    const userTransactionId = tx.hash.toHex();
+    const createdAtBlock = block.number
+    const timestamp = block.timestamp
+    const userAddress = beneficary.toHex()
+    const vaultAddressString = vault.id
+    const transactionType = UNKNOWN_TRANSACTION_TYPE
 
-    const userTransaction = new UserTransaction(tx.hash.toHex())
-    userTransaction.createAtBlock = block.number
-    userTransaction.timestamp = block.timestamp
-    userTransaction.userAddress = beneficary.toHex()
-    userTransaction.vault = vault.id
-    userTransaction.transactionType = 'Deposit'
-    userTransaction.sharePrice = sharePrice
-    userTransaction.value = vaultBalance.digits
-    userTransaction.save()
+    createBalanceHistory(userBalanceHistoryId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, userBalance.value, userBalance.additionalValues)
+    createUserTransaction(userTransactionId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, vaultBalance.digits)
+
   }
 }
 
@@ -173,47 +142,63 @@ export function createUserBalanceForFarm(amount: BigInt, beneficary: Address, tx
       userBalance.userAddress = beneficary.toHex()
     }
 
-    // if (isDeposit) {
-    //   const value = userBalance.value.plus(amount.divDecimal(BD_18))
-    //   userBalance.additionalValues = [userBalance.additionalValues[0], value]
-    //   userBalance.value = value.plus(userBalance.additionalValues[0])
-    //
-    // } else {
-    //   const tempValue = userBalance.value.minus(amount.divDecimal(BD_18))
-    //   const value = tempValue.lt(BigDecimal.zero())
-    //     ? BigDecimal.zero()
-    //     : tempValue
-    //   userBalance.additionalValues = [userBalance.additionalValues[0], value]
-    //   userBalance.value = value.plus(userBalance.additionalValues[0])
-    // }
-
     userBalance.additionalValues = [userBalance.additionalValues[0], value]
     userBalance.value = value.plus(userBalance.additionalValues[0])
     userBalance.save()
 
-    const userBalanceHistory = new UserBalanceHistory(`${tx.hash.toHex()}-${beneficary.toHex()}`)
-    userBalanceHistory.createAtBlock = block.number
-    userBalanceHistory.timestamp = block.timestamp
-    userBalanceHistory.userAddress = beneficary.toHex()
-    userBalanceHistory.vault = vault.id
-    userBalanceHistory.transactionType = isDeposit
-      ? 'Deposit'
-      : 'Withdraw'
-    userBalanceHistory.value = userBalance.value
-    userBalanceHistory.additionalValues = userBalance.additionalValues
-    userBalanceHistory.sharePrice = sharePrice
-    userBalanceHistory.save()
+    const userBalanceHistoryId = `${tx.hash.toHex()}-${beneficary.toHex()}`
+    const userTransactionId = tx.hash.toHex();
+    const createdAtBlock = block.number
+    const timestamp = block.timestamp
+    const userAddress = beneficary.toHex()
+    const vaultAddress = vault.id
+    const transactionType = getTransactionType(isDeposit)
 
-    const userTransaction = new UserTransaction(tx.hash.toHex())
-    userTransaction.createAtBlock = block.number
-    userTransaction.timestamp = block.timestamp
-    userTransaction.userAddress = beneficary.toHex()
-    userTransaction.vault = vault.id
-    userTransaction.transactionType = isDeposit
-      ? 'Deposit'
-      : 'Withdraw'
-    userTransaction.sharePrice = sharePrice
-    userTransaction.value = amount
-    userTransaction.save()
+    createBalanceHistory(userBalanceHistoryId, vaultAddress, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, userBalance.value, userBalance.additionalValues)
+    createUserTransaction(userTransactionId, vaultAddress, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, amount)
   }
+}
+
+function createBalanceHistory(
+  id: string,
+  vault: string,
+  timestamp: BigInt,
+  createdAtBlock: BigInt,
+  userAddress: string,
+  type: string,
+  sharePrice: BigDecimal,
+  value: BigDecimal,
+  additionalValues: BigDecimal[]
+  ): void {
+  const userBalanceHistory = new UserBalanceHistory(id)
+  userBalanceHistory.createAtBlock = createdAtBlock
+  userBalanceHistory.timestamp = timestamp
+  userBalanceHistory.userAddress = userAddress
+  userBalanceHistory.vault = vault
+  userBalanceHistory.transactionType = type
+  userBalanceHistory.sharePrice = sharePrice
+  userBalanceHistory.value = value
+  userBalanceHistory.additionalValues = additionalValues
+  userBalanceHistory.save()
+}
+
+function createUserTransaction(
+  tx: string,
+  vault: string,
+  timestamp: BigInt,
+  createdAtBlock: BigInt,
+  userAddress: string,
+  type: string,
+  sharePrice: BigDecimal,
+  value: BigInt
+): void {
+  const userTransaction = new UserTransaction(tx)
+  userTransaction.createAtBlock = createdAtBlock
+  userTransaction.timestamp = timestamp
+  userTransaction.userAddress = userAddress
+  userTransaction.vault = vault
+  userTransaction.transactionType = type
+  userTransaction.sharePrice = sharePrice
+  userTransaction.value = value
+  userTransaction.save()
 }

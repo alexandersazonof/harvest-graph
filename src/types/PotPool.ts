@@ -1,13 +1,16 @@
-import { Address, ethereum } from "@graphprotocol/graph-ts";
+import { Address, ethereum, log } from "@graphprotocol/graph-ts";
 import { Pool, Vault } from "../../generated/schema";
 import { loadOrCreateERC20Token } from "./Token";
 import { PotPoolContract } from "../../generated/PotNotifyHelperListener/PotPoolContract";
 import { PotPoolListener } from "../../generated/templates";
 import { loadOrCreateVault } from "./Vault";
 
-export function loadOrCreatePotPool(poolAddress: Address, ethBlock: ethereum.Block): void {
+const TYPE = 'PotPool'
+
+export function loadOrCreatePotPool(poolAddress: Address, ethBlock: ethereum.Block): Pool {
   let pool = Pool.load(poolAddress.toHex())
   if (pool == null) {
+    log.log(log.Level.INFO, `Create new pool ${TYPE}: ${poolAddress}`)
     let poolContract = PotPoolContract.bind(poolAddress)
     let vaultAddress = poolContract.lpToken();
     let rewardTokenAddress = poolContract.rewardToken();
@@ -16,7 +19,7 @@ export function loadOrCreatePotPool(poolAddress: Address, ethBlock: ethereum.Blo
     pool.timestamp = ethBlock.timestamp
     pool.createAtBlock = ethBlock.number
     pool.vault = vaultAddress.toHex()
-    pool.type = 'PotPool'
+    pool.type = TYPE
     pool.rewardTokens = [rewardToken.id]
     pool.save()
 
@@ -30,5 +33,7 @@ export function loadOrCreatePotPool(poolAddress: Address, ethBlock: ethereum.Blo
       vault.save()
     }
     PotPoolListener.create(poolAddress);
+    return pool
   }
+  return pool
 }

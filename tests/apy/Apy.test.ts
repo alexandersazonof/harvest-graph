@@ -4,7 +4,7 @@ import {
   test
 } from "matchstick-as/assembly/index"
 import { BigDecimal, BigInt, log } from "@graphprotocol/graph-ts";
-import { calculateApr, calculateAprAutoCompound, calculateApy } from "../../src/utils/Apy";
+import { calculateApr, calculateAprAutoCompound, calculateApy } from "../../src/utils/ApyUtils";
 import { BD_18 } from "../../src/utils/Constant";
 
 
