@@ -192,5 +192,6 @@ type UserTransaction @entity {
 enum TransactionType {
   Deposit
   Withdraw
+  Unknown
 }
 

@@ -125,12 +125,12 @@ describe("Apy tests", () => {
   })
 
   test('Calculate apy reward for fUniV3_ORC_WETH 3', ()=> {
-    const tvlUsd = BigDecimal.fromString('1001403')
+    const tvlUsd = BigDecimal.fromString('1700000')
     const period = BigDecimal.fromString('592392')
-    const rewardRate = BigDecimal.fromString('53437357791')
-    const rewardTokenPrice = BigDecimal.fromString('0.082')
+    // rewardRate for token
+    const rewardRate = BigDecimal.fromString('89718915343915343')
+    const rewardTokenPrice = BigDecimal.fromString('0.12')
     const rewardUsdForPeriod = rewardRate.div(BD_18).times(period).times(rewardTokenPrice)
-    // const rewardUsdForPeriod = BigDecimal.fromString('92')
 
     const apr = calculateApr(period, rewardUsdForPeriod, tvlUsd)
     const apy = calculateApy(apr)
@@ -138,15 +138,15 @@ describe("Apy tests", () => {
     log.log(log.Level.INFO, `rewardUsdForPeriod = ${rewardUsdForPeriod}`)
     log.log(log.Level.INFO, `apr = ${apr}`)
     log.log(log.Level.INFO, `apy = ${apy}`)
-    assert.assertTrue(apr.equals(BigDecimal.fromString('0.01182420625778443393188854489164087')))
-    assert.assertTrue(apy.equals(BigDecimal.fromString('0.0118249034291491860020857311177')))
+    assert.assertTrue(apr.equals(BigDecimal.fromString('19.9857433613445376112244705882353')))
+    assert.assertTrue(apy.equals(BigDecimal.fromString('22.1161844532205266959197802689959')))
   })
 
   test('Calculate apy reward for fUniV3_CNG_WETH', ()=> {
-    const tvlUsd = BigDecimal.fromString('240701')
-    const period = BigDecimal.fromString('592392')
-    const rewardRate = BigDecimal.fromString('53437357791')
-    const rewardTokenPrice = BigDecimal.fromString('0.59')
+    const tvlUsd = BigDecimal.fromString('440000')
+    const period = BigDecimal.fromString('592512')
+    const rewardRate = BigDecimal.fromString('49843841857730746')
+    const rewardTokenPrice = BigDecimal.fromString('0.059')
     const rewardUsdForPeriod = rewardRate.div(BD_18).times(period).times(rewardTokenPrice)
     // const rewardUsdForPeriod = BigDecimal.fromString('92')
 
@@ -156,7 +156,7 @@ describe("Apy tests", () => {
     log.log(log.Level.INFO, `rewardUsdForPeriod = ${rewardUsdForPeriod}`)
     log.log(log.Level.INFO, `apr = ${apr}`)
     log.log(log.Level.INFO, `apy = ${apy}`)
-    assert.assertTrue(apr.equals(BigDecimal.fromString('0.01182420625778443393188854489164087')))
-    assert.assertTrue(apy.equals(BigDecimal.fromString('0.0118249034291491860020857311177')))
+    assert.assertTrue(apr.equals(BigDecimal.fromString('21.09185668290043263822872727272727')))
+    assert.assertTrue(apy.equals(BigDecimal.fromString('23.4736577416503232053493577851685')))
   })
 })
