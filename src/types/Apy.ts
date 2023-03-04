@@ -40,12 +40,12 @@ export function saveApyReward(
 
       let price = BigDecimal.zero()
       const apy = new ApyReward(`${tx.hash.toHex()}-${vault.id}`)
+      let tokenPrice = getPriceForCoin(Address.fromString(pool.rewardTokens[0]), block.number.toI32())
 
       if (isPsAddress(pool.vault)) {
         price = getPriceForCoin(getFarmToken(), block.number.toI32()).divDecimal(BD_18)
         apy.rewardRate = rewardRate
-      }
-      else if (vault.isUniswapV3) {
+      } else if (vault.isUniswapV3) {
         const tokenLength = fetchRewardTokenLength(poolAddress)
         const index = tokenLength.minus(BigInt.fromI32(1))
         const rewardToken = fetchRewardToken(poolAddress, index)
@@ -58,15 +58,15 @@ export function saveApyReward(
           log.log(log.Level.ERROR, `Can not create apy reward for uniswapV3 pool: ${poolAddress.toHex()}, because rewardRate is 0. We tried get by tokenAddress = ${rewardToken}`)
           return;
         }
-        price = getPriceForCoin(rewardToken, block.number.toI32()).divDecimal(BD_18)
+        tokenPrice = getPriceForCoin(rewardToken, block.number.toI32())
         apy.rewardRate = rewardRateForUniswapV3
 
-      }
-      else {
-        price = getPriceByVault(vault, block.number.toI32())
+      } else {
+        tokenPrice = getPriceForCoin(Address.fromString(pool.rewardTokens[0]), block.number.toI32())
         apy.rewardRate = rewardRate
       }
 
+      price = getPriceByVault(vault, block.number.toI32())
       apy.periodFinish = periodFinish
       apy.rewardAmount = rewardAmount
       apy.rewardForPeriod = BigDecimal.zero()
@@ -75,7 +75,6 @@ export function saveApyReward(
       apy.tvlUsd = BigDecimal.zero()
       if (price.gt(BigDecimal.zero())) {
 
-        const tokenPrice = getPriceForCoin(Address.fromString(pool.rewardTokens[0]), block.number.toI32())
         const period = (periodFinish.minus(block.timestamp)).toBigDecimal()
 
         if (!tokenPrice.isZero() && !apy.rewardRate.isZero()) {
