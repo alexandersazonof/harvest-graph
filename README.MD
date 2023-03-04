@@ -17,7 +17,7 @@ For query use this urls:
 - **Ethereum** - https://thegraph.com/hosted-service/subgraph/alexandersazonof/harvest
 - **Polygon** - https://thegraph.com/hosted-service/subgraph/alexandersazonof/harvest-matic
 - **BSC** - TBD
-- **Arbitrum** - TBD
+- **Arbitrum** - https://thegraph.com/hosted-service/subgraph/alexandersazonof/havest-arbitrum
 
 
 ### Get all vaults
