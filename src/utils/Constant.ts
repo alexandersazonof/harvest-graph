@@ -52,6 +52,9 @@ export const SKIP_APY_REWARD_MAINNET = [
   '0xb9fa44b0911f6d777faab2fa9d8ef103f25ddf49'.toLowerCase()
 ]
 
+export const VAULT_UNI_V3_CNG_WETH = '0xc3426599Ec933FbF657ee44b53e7f01d83Be1f63'.toLowerCase()
+export const CNG = Address.fromString('0x5C1d9aA868a30795F92fAe903eDc9eFF269044bf')
+
 export const LP_UNI_PAIR_CONTRACT_NAME = [
   '1inch'.toLowerCase(),
   'SushiSwap'.toLowerCase(),
@@ -72,6 +75,10 @@ export const UNISWAP_V3_FEES = [
   '8000',
   '10000'
 ]
+
+export const BIG_APY_BD = BigDecimal.fromString('5000');
+
+
 
 export const I_FARM_TOKEN = Address.fromString('0x1571ed0bed4d987fe2b498ddbae7dfa19519f651')
 export const FARM_TOKEN_MAINNET = Address.fromString('0xa0246c9032bc3a600820415ae600c6388619a14d')

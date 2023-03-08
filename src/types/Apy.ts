@@ -3,10 +3,10 @@ import { Address, BigDecimal, BigInt, ethereum, log } from "@graphprotocol/graph
 import { getPriceByVault, getPriceForCoin } from "../utils/PriceUtils";
 import {
   BD_18,
-  BD_ZERO,
+  BD_ZERO, BIG_APY_BD, CNG,
   getFarmToken, I_FARM_TOKEN,
   isPsAddress, NULL_ADDRESS,
-  skipCalculateApyReward,
+  skipCalculateApyReward, VAULT_UNI_V3_CNG_WETH,
 } from "../utils/Constant";
 import { calculateTvlUsd } from "./Tvl";
 import { calculateApr, calculateAprAutoCompound, calculateApy } from "../utils/ApyUtils";
@@ -58,7 +58,12 @@ export function saveApyReward(
           log.log(log.Level.ERROR, `Can not create apy reward for uniswapV3 pool: ${poolAddress.toHex()}, because rewardRate is 0. We tried get by tokenAddress = ${rewardToken}`)
           return;
         }
-        tokenPrice = getPriceForCoin(rewardToken, block.number.toI32())
+        // only for pfUniV3_CNG_WETH get price for CNG
+        if (vault.id == VAULT_UNI_V3_CNG_WETH) {
+          tokenPrice = getPriceForCoin(CNG, block.number.toI32())
+        } else {
+          tokenPrice = getPriceForCoin(rewardToken, block.number.toI32())
+        }
         apy.rewardRate = rewardRateForUniswapV3
 
       } else {
@@ -96,8 +101,9 @@ export function saveApyReward(
         }
       }
 
-      if (apy.apy.le(BigDecimal.zero())) {
-        // don't save 0 APY
+      if (apy.apy.le(BigDecimal.zero()) || apy.apy.gt(BIG_APY_BD)) {
+        // don't save 0 APY && more 5000
+        log.log(log.Level.ERROR, `Can not save APY < 0 OR APY > 5000 for pool ${poolAddress.toHex()}`)
         return;
       }
       apy.vault = vault.id
@@ -126,6 +132,13 @@ export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigD
     apyAutoCompound.apy = calculateApy(apyAutoCompound.apr)
     apyAutoCompound.vault = vaultAddress
     apyAutoCompound.diffSharePrice = diffSharePrice
+
+    if (apyAutoCompound.apy.le(BigDecimal.zero()) || apyAutoCompound.apy.gt(BIG_APY_BD)) {
+      // don't save 0 APY && more 5000
+      log.log(log.Level.ERROR, `Can not save APY < 0 OR APY > 5000 for vault ${vaultAddress}`)
+      return BigDecimal.zero();
+    }
+
     apyAutoCompound.save()
   }
   return apyAutoCompound.apy
