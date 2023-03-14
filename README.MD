@@ -14,10 +14,9 @@ For query use this urls:
 <https://api.thegraph.com/subgraphs/id/{id}>
 #### ID you can take from dashboard
 
-- **Ethereum** - https://thegraph.com/hosted-service/subgraph/alexandersazonof/harvest
-- **Polygon** - https://thegraph.com/hosted-service/subgraph/alexandersazonof/harvest-matic
-- **BSC** - TBD
-- **Arbitrum** - https://thegraph.com/hosted-service/subgraph/alexandersazonof/havest-arbitrum
+- **Ethereum** - https://thegraph.com/hosted-service/subgraph/harvestfi/harvest-finance
+- **Polygon** - https://thegraph.com/hosted-service/subgraph/harvestfi/harvest-finance-polygon
+- **Arbitrum** - https://thegraph.com/hosted-service/subgraph/harvestfi/harvest-finance-arbitrum
 
 
 ### Get all vaults
