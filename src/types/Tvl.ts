@@ -1,5 +1,5 @@
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
-import { Tvl, Vault } from "../../generated/schema";
+import { TotalTvl, TotalTvlHistory, Tvl, Vault } from "../../generated/schema";
 import { fetchContractDecimal, fetchContractTotalSupply } from "../utils/ERC20Utils";
 import { getPriceByVault, getPriceForCoin } from "../utils/PriceUtils";
 import {
@@ -53,6 +53,10 @@ export function createTvl(address: Address, transaction: ethereum.Transaction, b
         tvl.value = BD_ZERO;
       }
       tvl.save()
+
+      createTotalTvl(vault.tvl, tvl.value, id, block)
+      vault.tvl = tvl.value
+      vault.save()
     }
   }
 }
@@ -61,24 +65,60 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, transa
   if (price.le(BigDecimal.zero())) {
     return BD_ZERO
   }
-  const totalSupply = fetchContractTotalSupply(vaultAddress)
-  const decimal = fetchContractDecimal(vaultAddress)
-  const tempDecimal = pow(BigDecimal.fromString('10'), decimal.toI32())
-  const sharePrice = fetchPricePerFullShare(vaultAddress)
-  const sharePriceDivDecimal = sharePrice.divDecimal(tempDecimal)
-  const value = totalSupply.divDecimal(tempDecimal).times(price).times(sharePriceDivDecimal)
-  const id = `${transaction.hash.toHex()}-${vaultAddress.toHex()}`
-  let tvl = Tvl.load(id)
-  if (tvl == null) {
-    tvl = new Tvl(id)
-    tvl.vault = vaultAddress.toHex()
-    tvl.timestamp = block.timestamp
-    tvl.createAtBlock = block.number
-    tvl.totalSupply = totalSupply
-    tvl.sharePrice = sharePrice
-    tvl.priceUnderlying = price
-    tvl.value = value
-    tvl.save()
+  const vault = Vault.load(vaultAddress.toHex())
+  if (vault != null) {
+    const totalSupply = fetchContractTotalSupply(vaultAddress)
+    const decimal = fetchContractDecimal(vaultAddress)
+    const tempDecimal = pow(BigDecimal.fromString('10'), decimal.toI32())
+    const sharePrice = fetchPricePerFullShare(vaultAddress)
+    const sharePriceDivDecimal = sharePrice.divDecimal(tempDecimal)
+    const value = totalSupply.divDecimal(tempDecimal).times(price).times(sharePriceDivDecimal)
+    const id = `${transaction.hash.toHex()}-${vaultAddress.toHex()}`
+    let tvl = Tvl.load(id)
+    if (tvl == null) {
+      tvl = new Tvl(id)
+      tvl.vault = vault.id
+      tvl.timestamp = block.timestamp
+      tvl.createAtBlock = block.number
+      tvl.totalSupply = totalSupply
+      tvl.sharePrice = sharePrice
+      tvl.priceUnderlying = price
+      tvl.value = value
+      tvl.save()
+
+      createTotalTvl(vault.tvl, tvl.value, id, block)
+      vault.tvl = tvl.value
+      vault.save()
+
+      createTotalTvl(vault.tvl, tvl.value, id, block)
+      vault.tvl = tvl.value
+      vault.save()
+    }
+    return value
   }
-  return value
+  return BigDecimal.zero()
+}
+
+
+export function createTotalTvl(oldValue:BigDecimal, newValue: BigDecimal, id: string, block: ethereum.Block): void {
+  const defaultId = '1';
+  let totalTvl = TotalTvl.load(defaultId)
+  if (totalTvl == null) {
+    totalTvl = new TotalTvl(defaultId)
+    totalTvl.value = BigDecimal.zero()
+    totalTvl.save()
+  }
+
+  totalTvl.value = totalTvl.value.minus(oldValue).plus(newValue);
+  totalTvl.save()
+
+  let totalTvlHistory = TotalTvlHistory.load(id)
+  if (totalTvlHistory == null) {
+    totalTvlHistory = new TotalTvlHistory(id)
+
+    totalTvlHistory.value = totalTvl.value
+    totalTvlHistory.timestamp = block.timestamp
+    totalTvlHistory.createAtBlock = block.number
+    totalTvlHistory.save()
+  }
 }

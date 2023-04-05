@@ -39,6 +39,7 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     } else {
       vault.isIFarm = false
     }
+    vault.tvl = BigDecimal.zero()
     vault.save();
   }
 

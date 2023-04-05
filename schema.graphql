@@ -28,6 +28,7 @@ type Vault @entity {
   apyRewardCount: BigInt!
   isUniswapV3: Boolean
   isIFarm: Boolean
+  tvl: BigDecimal!
   skipFirstApyReward: Boolean
 }
 
@@ -195,3 +196,20 @@ enum TransactionType {
   Unknown
 }
 
+
+type TotalTvl @entity{
+
+  id: ID!
+
+  value: BigDecimal!
+}
+
+type TotalTvlHistory @entity{
+
+  id: ID!
+
+  value: BigDecimal!
+
+  timestamp: BigInt!
+  createAtBlock: BigInt!
+}
