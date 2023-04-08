@@ -8,7 +8,7 @@ import {
   DEFAULT_DECIMAL,
   DEFAULT_PRICE,
   getFarmToken,
-  getOracleAddress, isPsAddress, isStableCoin,
+  getOracleAddress, isPsAddress, isStableCoin, LV_USD_3_CRV,
   NOTIONAL_ORACLE_ADDRESS,
   NULL_ADDRESS,
 } from "./Constant";
@@ -25,7 +25,7 @@ import { fetchContractDecimal } from "./ERC20Utils";
 import { pow, powBI } from "./MathUtils";
 import { NotionalToken } from "../../generated/templates/VaultListener/NotionalToken";
 import { NotionalOracle } from "../../generated/templates/VaultListener/NotionalOracle";
-import { isBalancer, isCurve, isLpUniPair, isNotional, isUniswapV3 } from "./PlatformUtils";
+import { isBalancer, isBalancerContract, isCurve, isLpUniPair, isNotional, isUniswapV3 } from "./PlatformUtils";
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
@@ -73,6 +73,10 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
     return getPriceForUniswapV3(vault, block)
   }
 
+  if (vault.id.toLowerCase() == LV_USD_3_CRV) {
+    return BD_ONE;
+  }
+
   const underlying = Token.load(underlyingAddress)
   if (underlying != null) {
     if (isLpUniPair(underlying.name)) {
@@ -81,10 +85,6 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
         return tempPrice.divDecimal(BD_18)
       }
       return getPriceLpUniPair(underlying.id, block)
-    }
-
-    if (isBalancer(underlying.name)) {
-      return getPriceForBalancer(underlying.id, block)
     }
 
     if (isCurve(underlying.name)) {
@@ -98,6 +98,10 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
 
     if (isNotional(underlying.name)) {
       return getPriceForNotional(underlying, block)
+    }
+
+    if (isBalancer(underlying.name) && isBalancerContract(Address.fromString(underlying.id))) {
+      return getPriceForBalancer(underlying.id, block)
     }
   }
 

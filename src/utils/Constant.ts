@@ -23,6 +23,7 @@ export const STABLE_COIN_ARRAY_MAINNET = [
   '0xdAC17F958D2ee523a2206206994597C13D831ec7'.toLowerCase(),
   '0x0000000000085d4780B73119b644AE5ecd22b376'.toLowerCase(),
   '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase(),
+  '0xD5a14081a34d256711B02BbEf17E567da48E80b5'.toLowerCase()
 ]
 
 export const STABLE_COIN_ARRAY_MATIC = [
@@ -92,6 +93,9 @@ export const NOTIONAL_ORACLE_ADDRESS = Address.fromString('0x65c816077C29b557BEE
 export const MEGA_FACTORY_ADDRESS = Address.fromString('0xe1ec9151eb8d9a3451b8f623ce8b62632a6d4f4d')
 
 export const NULL_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000');
+
+export const LV_USD_3_CRV = '0xD86B672D1FcaE8667d2be188dB02846Cb3D7F8ae'.toLowerCase()
+
 
 export function isStableCoin(address: string): boolean {
   if (dataSource.network() == 'mainnet') {
