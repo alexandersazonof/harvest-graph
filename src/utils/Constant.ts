@@ -17,6 +17,9 @@ export const BD_ONE = BigDecimal.fromString('1')
 export const BD_TEN = BigDecimal.fromString('10')
 export const BD_ONE_HUNDRED = BigDecimal.fromString('100')
 
+export const BD_TEN_MILLION = BigDecimal.fromString('10000000')
+
+
 export const STABLE_COIN_ARRAY_MAINNET = [
   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase(),
   '0xe9e7cea3dedca5984780bafc599bd69add087d56'.toLowerCase(),
@@ -55,6 +58,8 @@ export const SKIP_APY_REWARD_MAINNET = [
 
 export const VAULT_UNI_V3_CNG_WETH = '0xc3426599Ec933FbF657ee44b53e7f01d83Be1f63'.toLowerCase()
 export const CNG = Address.fromString('0x5C1d9aA868a30795F92fAe903eDc9eFF269044bf')
+
+export const UNI_V3_WBTC_WETH = '0x2357685B07469eE80A389819C7A41edCD70cd88C'.toLowerCase()
 
 export const LP_UNI_PAIR_CONTRACT_NAME = [
   '1inch'.toLowerCase(),
