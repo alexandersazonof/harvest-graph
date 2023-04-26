@@ -2,8 +2,8 @@ import { Address, BigDecimal, BigInt, log } from "@graphprotocol/graph-ts";
 import { OracleContract } from "../../generated/templates/VaultListener/OracleContract";
 import {
   BD_18,
-  BD_ONE,
-  BD_TEN, BD_TEN_MILLION,
+  BD_ONE, BD_ONE_TRILLION,
+  BD_TEN,
   BI_18,
   DEFAULT_DECIMAL,
   DEFAULT_PRICE,
@@ -11,7 +11,7 @@ import {
   getOracleAddress, isPsAddress, isStableCoin, LV_USD_3_CRV,
   NOTIONAL_ORACLE_ADDRESS,
   NULL_ADDRESS, UNI_V3_WBTC_WETH,
-} from "./Constant";
+} from './Constant';
 import { Token, Vault } from "../../generated/schema";
 import { UniswapV2PairContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV2PairContract";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
@@ -159,7 +159,7 @@ export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
     let price = balance
       .div(liquidity.divDecimal(BD_18))
 
-    if  (price.gt(BD_TEN_MILLION) && vault.id.toLowerCase() == UNI_V3_WBTC_WETH) {
+    if  (price.gt(BD_ONE_TRILLION) && vault.id.toLowerCase() == UNI_V3_WBTC_WETH) {
       return price.div(pow(BD_TEN, 3))
     }
     return price;

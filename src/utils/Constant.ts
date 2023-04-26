@@ -17,7 +17,7 @@ export const BD_ONE = BigDecimal.fromString('1')
 export const BD_TEN = BigDecimal.fromString('10')
 export const BD_ONE_HUNDRED = BigDecimal.fromString('100')
 
-export const BD_TEN_MILLION = BigDecimal.fromString('10000000')
+export const BD_ONE_TRILLION = BigDecimal.fromString('1000000000')
 
 
 export const STABLE_COIN_ARRAY_MAINNET = [
