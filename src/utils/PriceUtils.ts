@@ -100,7 +100,7 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
       return getPriceForNotional(underlying, block)
     }
 
-    if (isBalancer(underlying.name) && isBalancerContract(Address.fromString(underlying.id))) {
+    if (isBalancer(underlying.name) || isBalancerContract(Address.fromString(underlying.id))) {
       return getPriceForBalancer(underlying.id, block)
     }
   }

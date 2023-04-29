@@ -5,6 +5,7 @@ import { loadOrCreateERC20Token } from "./Token";
 import { IFarmVaultListener, UniswapV3VaultListener, VaultListener } from "../../generated/templates";
 import { fetchUnderlyingAddress } from "../utils/VaultUtils";
 import { isIFarm, isUniswapV3 } from "../utils/PlatformUtils";
+import { pushVault } from './TotalTvlUtils';
 
 export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, strategy: string = 'unknown'): Vault {
   let vault = Vault.load(vaultAddress.toHex())
@@ -41,6 +42,7 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     }
     vault.tvl = BigDecimal.zero()
     vault.save();
+    pushVault(vault.id, block)
   }
 
   return vault;

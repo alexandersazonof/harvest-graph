@@ -22,6 +22,8 @@ dataSources:
       callHandlers:
         - function: setController(address)
           handler: handleSetController
+      blockHandlers:
+        - handler: handleBlock
       file: ./src/StorageListener.ts
     network: mainnet
   - kind: ethereum
