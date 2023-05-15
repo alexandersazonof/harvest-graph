@@ -18,11 +18,18 @@ export const BD_TEN = BigDecimal.fromString('10')
 export const BD_ONE_HUNDRED = BigDecimal.fromString('100')
 export const CONST_ID = '1';
 
+
+export const TOTAL_TVL_FROM = BigInt.fromString('14522503')
+
+export const TVL_WARN = BigDecimal.fromString('1000000000');
 export const BD_ONE_TRILLION = BigDecimal.fromString('1000000000')
 
 export const EVERY_24_HOURS = 86400;
 export const BI_EVERY_24_HOURS = BigInt.fromString('86400');
+export const EVERY_7_DAYS = 604800;
+export const BI_EVERY_7_DAYS = BigInt.fromString('604800');
 export const MODULE_RESULT = 75600;
+export const MODULE_RESULT_V2 = 518400;
 
 export const STABLE_COIN_ARRAY_MAINNET = [
   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase(),
@@ -63,7 +70,40 @@ export const SKIP_APY_REWARD_MAINNET = [
 export const VAULT_UNI_V3_CNG_WETH = '0xc3426599Ec933FbF657ee44b53e7f01d83Be1f63'.toLowerCase()
 export const CNG = Address.fromString('0x5C1d9aA868a30795F92fAe903eDc9eFF269044bf')
 
-export const UNI_V3_WBTC_WETH = '0x2357685B07469eE80A389819C7A41edCD70cd88C'.toLowerCase()
+export const UNI_V3_WBTC_WETH = '0x2357685b07469ee80a389819c7a41edcd70cd88c'.toLowerCase()
+export const FARM_DAI = '0xe85c8581e60d7cd32bbfd86303d2a4fa6a951dac'.toLowerCase()
+export const FARM_USDC = '0xc3f7ffb5d5869b3ade9448d094d81b0521e8326f'.toLowerCase()
+export const FARM_USDT = '0xc7ee21406bb581e741fbb8b21f213188433d9f2f'.toLowerCase()
+export const FARM_WBTC = '0xc07eb91961662d275e2d285bdc21885a4db136b0'.toLowerCase()
+export const FARM_renBTC = '0xfbe122d0ba3c75e1f7c80bd27613c9f35b81feec'.toLowerCase()
+export const FARM_crvRenWBTC = '0x192e9d29d43db385063799bc239e772c3b6888f3'.toLowerCase()
+export const FARM_WETH = '0x8e298734681adbfc41ee5d17ff8b0d6d803e7098'.toLowerCase()
+export const FARM_UNI_V2_FIRST = '0xb19ebfb37a936cce783142955d39ca70aa29d43c'.toLowerCase()
+export const FARM_UNI_V2_SECOND = '0x1a9f22b4c385f78650e7874d64e442839dc32327'.toLowerCase()
+export const FARM_UNI_V2_THIRD = '0x63671425ef4d25ec2b12c7d05de855c143f16e3b'.toLowerCase()
+export const FARM_UNI_V2_FOURTH = '0xb1feb6ab4ef7d0f41363da33868e85eb0f3a57ee'.toLowerCase()
+export const FARM_UNI_V2_FIVE = '0x25550cccbd68533fa04bfd3e3ac4d09f9e00fc50'.toLowerCase()
+
+export const SKIP_TOTAL_TVL = [
+  UNI_V3_WBTC_WETH,
+  FARM_DAI,
+  FARM_USDC,
+  FARM_USDT,
+  FARM_WBTC,
+  FARM_renBTC,
+  FARM_crvRenWBTC,
+  FARM_WETH,
+  FARM_UNI_V2_FIRST,
+  FARM_UNI_V2_SECOND,
+  FARM_UNI_V2_THIRD,
+  FARM_UNI_V2_FOURTH,
+  FARM_UNI_V2_FIVE,
+  "0x2ce57694b635f6ea0087a341654543e12b082538",
+  "0xe29385f6b90f25082972b75ccbc69900ce8a176a",
+  "0xd3093e3efbe00f010e8f5efe3f1cb5d9b7fe0eb1",
+  // iFarm
+  "0x1571ed0bed4d987fe2b498ddbae7dfa19519f651"
+]
 
 export const LP_UNI_PAIR_CONTRACT_NAME = [
   '1inch'.toLowerCase(),
@@ -155,4 +195,13 @@ export function skipCalculateApyReward(address: string): boolean {
     return SKIP_APY_REWARD_MAINNET.join(' ').includes(address) == true
   }
   return false
+}
+
+export function canCalculateTotalTvl(address: string): boolean {
+  for (let i=0;i<SKIP_TOTAL_TVL.length;i++) {
+    if (address.toLowerCase() == SKIP_TOTAL_TVL[i]) {
+      return false;
+    }
+  }
+  return true;
 }

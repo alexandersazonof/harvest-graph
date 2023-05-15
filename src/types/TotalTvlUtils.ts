@@ -27,16 +27,16 @@ export function getTvlUtils(block: ethereum.Block): TotalTvlUtil {
 }
 
 export function createTotalTvl(block: ethereum.Block): void {
-  const tvlUtils = getTvlUtils(block)
-  let totalTvl = BigDecimal.zero()
-  const array = tvlUtils.vaults
-  for (let i = 0; i < array.length; i++) {
-    const tvl = createTvl(Address.fromString(array[i]), block)
-    if (tvl != null) {
-      totalTvl.plus(tvl.value)
-    }
-  }
-  createTvlV2(totalTvl, block);
-  tvlUtils.lastTimestampUpdate = block.timestamp
-  tvlUtils.save()
+  // const tvlUtils = getTvlUtils(block)
+  // let totalTvl = BigDecimal.zero()
+  // const array = tvlUtils.vaults
+  // for (let i = 0; i < array.length; i++) {
+  //   const tvl = createTvl(Address.fromString(array[i]), block)
+  //   if (tvl != null) {
+  //     totalTvl = totalTvl.plus(tvl.value)
+  //   }
+  // }
+  // createTvlV2(totalTvl, block);
+  // tvlUtils.lastTimestampUpdate = block.timestamp
+  // tvlUtils.save()
 }
