@@ -210,6 +210,10 @@ type TotalTvlHistory @entity{
 
   value: BigDecimal!
 
+  oldValue: BigDecimal!
+  newValue: BigDecimal!
+  vault: Vault!
+
   timestamp: BigInt!
   createAtBlock: BigInt!
 }

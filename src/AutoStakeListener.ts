@@ -11,3 +11,4 @@ export function handleWithdrawn(event: Withdrawn): void {
   createTvl(event.address, event.block, event.transaction)
   createUserBalanceForFarm(event.params.amount, event.params.user, event.transaction, event.block, false, event.address)
 }
+

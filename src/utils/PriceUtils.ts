@@ -6,11 +6,11 @@ import {
   BD_TEN,
   BI_18,
   DEFAULT_DECIMAL,
-  DEFAULT_PRICE,
+  DEFAULT_PRICE, ETH_BALANCER_POOL,
   getFarmToken,
   getOracleAddress, isPsAddress, isStableCoin, LV_USD_3_CRV,
   NOTIONAL_ORACLE_ADDRESS,
-  NULL_ADDRESS, UNI_V3_WBTC_WETH,
+  NULL_ADDRESS, PETH_CRV, UNI_V3_WBTC_WETH, USD_BALANCER_POOL, WETH,
 } from './Constant';
 import { Token, Vault } from "../../generated/schema";
 import { UniswapV2PairContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV2PairContract";
@@ -73,8 +73,12 @@ export function getPriceByVault(vault: Vault, block: number): BigDecimal {
     return getPriceForUniswapV3(vault, block)
   }
 
-  if (vault.id.toLowerCase() == LV_USD_3_CRV) {
+  if (vault.id.toLowerCase() == LV_USD_3_CRV || vault.id.toLowerCase() == USD_BALANCER_POOL) {
     return BD_ONE;
+  }
+
+  if (vault.id.toLowerCase() == PETH_CRV || vault.id.toLowerCase() == ETH_BALANCER_POOL) {
+    return getPriceForCoin(WETH, block).divDecimal(BD_18);
   }
 
   const underlying = Token.load(underlyingAddress)
@@ -271,25 +275,29 @@ export function getPriceLpUniPair(underlyingAddress: string, block: number): Big
 export function getPriceForBalancer(underlying: string, block: number): BigDecimal {
   const balancer = WeightedPool2TokensContract.bind(Address.fromString(underlying))
   const poolId = balancer.getPoolId()
-  const totalSupply = balancer.totalSupply()
+  const totalSupply = balancer.totalSupply().divDecimal(BD_18)
   const vault = BalancerVaultContract.bind(balancer.getVault())
   const tokenInfo = vault.getPoolTokens(poolId)
 
   let price = BigDecimal.zero()
   for (let i=0;i<tokenInfo.getTokens().length;i++) {
-    const tokenPrice = getPriceForCoin(tokenInfo.getTokens()[i], block).divDecimal(BD_18)
-    const tryDecimals = ERC20.bind(tokenInfo.getTokens()[i]).try_decimals()
+    const token = tokenInfo.getTokens()[i]
+    // TODO add recursive price
+    const tokenPrice = getPriceForCoin(token, block)
+    const tokenPriceAfterDiv = tokenPrice.divDecimal(BD_18)
+    const tryDecimals = ERC20.bind(token).try_decimals()
     let decimal = DEFAULT_DECIMAL
     if (!tryDecimals.reverted) {
       decimal = tryDecimals.value
     }
     // const balance = normalizePrecision(tokenInfo.getBalances()[i], decimal).toBigDecimal()
     const balance = tokenInfo.getBalances()[i].divDecimal(pow(BD_TEN, decimal))
-    price = price.plus(balance.times(tokenPrice))
+
+    price = price.plus(balance.times(tokenPriceAfterDiv))
   }
 
   if (price.le(BigDecimal.zero())) {
     return price
   }
-  return price.div(totalSupply.toBigDecimal())
+  return price.div(totalSupply)
 }

@@ -57,8 +57,8 @@ export function createTvl(address: Address, block: ethereum.Block, transaction: 
       }
       tvl.save()
 
-      if (canCalculateTotalTvl(vault.id) && block.number.gt(TOTAL_TVL_FROM)) {
-        createTotalTvl(vault.tvl, tvl.value, id, block)
+      if (canCalculateTotalTvl(vault.id)) {
+        createTotalTvl(vault.tvl, tvl.value, id, block, vault.id)
       }
       vault.tvl = tvl.value
       vault.save()
@@ -98,8 +98,8 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, transa
 
       tvl.save()
 
-      if (canCalculateTotalTvl(vault.id) && block.number.gt(TOTAL_TVL_FROM)) {
-        createTotalTvl(vault.tvl, tvl.value, id, block)
+      if (canCalculateTotalTvl(vault.id)) {
+        createTotalTvl(vault.tvl, tvl.value, id, block, vault.id)
       }
       vault.tvl = tvl.value
       vault.save()
@@ -110,7 +110,7 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, transa
 }
 
 
-export function createTotalTvl(oldValue:BigDecimal, newValue: BigDecimal, id: string, block: ethereum.Block): void {
+export function createTotalTvl(oldValue:BigDecimal, newValue: BigDecimal, id: string, block: ethereum.Block, vaultId: string): void {
   const defaultId = '1';
   let totalTvl = TotalTvl.load(defaultId)
   if (totalTvl == null) {
@@ -126,6 +126,9 @@ export function createTotalTvl(oldValue:BigDecimal, newValue: BigDecimal, id: st
   if (totalTvlHistory == null) {
     totalTvlHistory = new TotalTvlHistory(`${id}-${oldValue.toString()}-${newValue.toString()}`)
 
+    totalTvlHistory.oldValue = oldValue
+    totalTvlHistory.newValue = newValue
+    totalTvlHistory.vault = vaultId
     totalTvlHistory.value = totalTvl.value
     totalTvlHistory.timestamp = block.timestamp
     totalTvlHistory.createAtBlock = block.number

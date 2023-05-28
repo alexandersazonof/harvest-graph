@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, dataSource } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, dataSource, log } from '@graphprotocol/graph-ts';
 import { pow } from "./MathUtils";
 
 export const UNKNOWN = 'unknown';
@@ -102,7 +102,7 @@ export const SKIP_TOTAL_TVL = [
   "0xe29385f6b90f25082972b75ccbc69900ce8a176a",
   "0xd3093e3efbe00f010e8f5efe3f1cb5d9b7fe0eb1",
   // iFarm
-  "0x1571ed0bed4d987fe2b498ddbae7dfa19519f651"
+  "0x1571ed0bed4d987fe2b498ddbae7dfa19519f651",
 ]
 
 export const LP_UNI_PAIR_CONTRACT_NAME = [
@@ -144,10 +144,15 @@ export const MEGA_FACTORY_ADDRESS = Address.fromString('0xe1ec9151eb8d9a3451b8f6
 export const NULL_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000');
 
 export const LV_USD_3_CRV = '0xD86B672D1FcaE8667d2be188dB02846Cb3D7F8ae'.toLowerCase()
+export const PETH_CRV = '0x4cf4f433e359a343648c480b2f3952fd64616a9a'.toLowerCase();
+export const ETH_BALANCER_POOL = '0x80ef5ef7099c69bc9fcf952217240331f96bdf5f'.toLowerCase();
+export const USD_BALANCER_POOL = '0x85472c764Ca52B189eB09497B683B2FD9cD79213'.toLowerCase();
 
+export const WETH = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2');
 
 export function isStableCoin(address: string): boolean {
   if (dataSource.network() == 'mainnet') {
+    log.log(log.Level.INFO, `is isStableCoin`)
     return STABLE_COIN_ARRAY_MAINNET.join(' ').includes(address) == true
   } else if (dataSource.network() == 'matic') {
     return STABLE_COIN_ARRAY_MATIC.join(' ').includes(address) == true
