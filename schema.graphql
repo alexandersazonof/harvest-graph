@@ -234,6 +234,7 @@ type TotalTvlUtil @entity{
 
   vaults: [String!]!
   lastTimestampUpdate: BigInt!
+  lastBlockUpdate: BigInt!
 
   timestamp: BigInt!
   createAtBlock: BigInt!

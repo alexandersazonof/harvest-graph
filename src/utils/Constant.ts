@@ -28,6 +28,8 @@ export const EVERY_24_HOURS = 86400;
 export const BI_EVERY_24_HOURS = BigInt.fromString('86400');
 export const EVERY_7_DAYS = 604800;
 export const BI_EVERY_7_DAYS = BigInt.fromString('604800');
+export const BI_EVERY_21_DAYS = BigInt.fromString('1814400');
+
 export const MODULE_RESULT = 75600;
 export const MODULE_RESULT_V2 = 518400;
 
@@ -111,7 +113,8 @@ export const LP_UNI_PAIR_CONTRACT_NAME = [
   // only uniswap v2
   'Uniswap'.toLowerCase(),
   'Pancake'.toLowerCase(),
-  'Kyber'.toLowerCase()
+  'Kyber'.toLowerCase(),
+  'Verse Exchange'.toLowerCase(),
 ]
 export const BALANCER_CONTRACT_NAME = 'Balancer'.toLowerCase()
 export const CURVE_CONTRACT_NAME = 'Curve'.toLowerCase()

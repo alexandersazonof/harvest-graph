@@ -11,8 +11,8 @@ export function handleSetController(call: SetControllerCall): void {
 export function handleBlock(block: ethereum.Block): void {
   const tvlUtils = getTvlUtils(block)
   if (block.timestamp.toI32() % EVERY_7_DAYS == MODULE_RESULT_V2) {
-    createTotalTvl(block)
+    // createTotalTvl(block)
   } else if (block.timestamp.ge(tvlUtils.lastTimestampUpdate.plus(BI_EVERY_7_DAYS))) {
-    createTotalTvl(block)
+    // createTotalTvl(block)
   }
 }

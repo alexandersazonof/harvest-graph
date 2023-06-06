@@ -1,7 +1,8 @@
 import { TotalTvlUtil } from '../../generated/schema';
-import { Address, BigDecimal, ethereum } from '@graphprotocol/graph-ts';
-import { CONST_ID } from '../utils/Constant';
+import { Address, BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts';
+import { BI_EVERY_7_DAYS, canCalculateTotalTvl, CONST_ID, EVERY_7_DAYS } from '../utils/Constant';
 import { createTvl, createTvlV2 } from './Tvl';
+import { loadOrCreateVault } from './Vault';
 
 export function pushVault(address: string, block: ethereum.Block): void {
   const vaultUtils = getTvlUtils(block);
@@ -20,23 +21,34 @@ export function getTvlUtils(block: ethereum.Block): TotalTvlUtil {
     vaultUtils.lastTimestampUpdate = block.timestamp
     vaultUtils.timestamp = block.timestamp
     vaultUtils.createAtBlock = block.number
+    vaultUtils.lastBlockUpdate = BigInt.zero();
     vaultUtils.save()
   }
 
   return vaultUtils;
 }
 
+export function canCalculateTotalTvlV2(block: ethereum.Block): void {
+  const tvlUtil = getTvlUtils(block);
+
+  if (tvlUtil.lastTimestampUpdate.plus(BI_EVERY_7_DAYS) > block.timestamp || tvlUtil.lastTimestampUpdate.isZero()) {
+    createTotalTvl(block);
+  }
+}
+
 export function createTotalTvl(block: ethereum.Block): void {
-  // const tvlUtils = getTvlUtils(block)
-  // let totalTvl = BigDecimal.zero()
-  // const array = tvlUtils.vaults
-  // for (let i = 0; i < array.length; i++) {
-  //   const tvl = createTvl(Address.fromString(array[i]), block)
-  //   if (tvl != null) {
-  //     totalTvl = totalTvl.plus(tvl.value)
-  //   }
-  // }
-  // createTvlV2(totalTvl, block);
-  // tvlUtils.lastTimestampUpdate = block.timestamp
-  // tvlUtils.save()
+  const tvlUtils = getTvlUtils(block)
+  let totalTvl = BigDecimal.zero()
+  const array = tvlUtils.vaults
+  for (let i = 0; i < array.length; i++) {
+    const vault = Address.fromString(array[i]);
+    if (canCalculateTotalTvl(vault.toHexString())) {
+      const tvl = loadOrCreateVault(vault, block).tvl
+      totalTvl = totalTvl.plus(tvl)
+    }
+  }
+  createTvlV2(totalTvl, block);
+  tvlUtils.lastTimestampUpdate = block.timestamp
+  tvlUtils.lastBlockUpdate = block.number
+  tvlUtils.save()
 }
