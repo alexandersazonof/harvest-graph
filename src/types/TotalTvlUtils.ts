@@ -1,4 +1,4 @@
-import { TotalTvlUtil } from '../../generated/schema';
+import { TotalTvlCount, TotalTvlUtil } from '../../generated/schema';
 import { Address, BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import { BI_EVERY_7_DAYS, canCalculateTotalTvl, CONST_ID, EVERY_7_DAYS } from '../utils/Constant';
 import { createTvl, createTvlV2 } from './Tvl';
@@ -51,4 +51,16 @@ export function createTotalTvl(block: ethereum.Block): void {
   tvlUtils.lastTimestampUpdate = block.timestamp
   tvlUtils.lastBlockUpdate = block.number
   tvlUtils.save()
+}
+
+
+export function totalTvlUp(): void {
+  let totalCount = TotalTvlCount.load('1')
+  if (!totalCount) {
+    totalCount = new TotalTvlCount('1');
+    totalCount.length = BigInt.zero();
+  }
+
+  totalCount.length = totalCount.length.plus(BigInt.fromString('1'));
+  totalCount.save();
 }
