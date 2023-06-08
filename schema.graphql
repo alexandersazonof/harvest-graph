@@ -223,7 +223,7 @@ type TotalTvlHistoryV2 @entity{
   id: ID!
 
   value: BigDecimal!
-  sequenceId: String!
+  sequenceId: BigInt!
 
   timestamp: BigInt!
   createAtBlock: BigInt!

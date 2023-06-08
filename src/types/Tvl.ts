@@ -144,11 +144,10 @@ export function createTvlV2(totalTvl: BigDecimal, block: ethereum.Block): void {
   if (totalTvlHistory == null) {
     totalTvlHistory = new TotalTvlHistoryV2(block.number.toString())
 
-    totalTvlHistory.sequenceId = `${block.number}-${totalTvl}`
+    totalTvlHistory.sequenceId = totalTvlUp();
     totalTvlHistory.value = totalTvl
     totalTvlHistory.timestamp = block.timestamp
     totalTvlHistory.createAtBlock = block.number
     totalTvlHistory.save()
-    totalTvlUp();
   }
 }
