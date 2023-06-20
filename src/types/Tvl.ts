@@ -1,11 +1,11 @@
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
-import { TotalTvl, TotalTvlHistory, TotalTvlHistoryV2, Tvl, Vault } from '../../generated/schema';
+import { TotalTvl, TotalTvlHistory, TotalTvlHistoryV2, Tvl, TvlSequnceId, Vault } from '../../generated/schema';
 import { fetchContractDecimal, fetchContractTotalSupply } from "../utils/ERC20Utils";
 import { getPriceByVault, getPriceForCoin } from "../utils/PriceUtils";
 import {
   BD_18,
   BD_ZERO,
-  BI_18, canCalculateTotalTvl,
+  BI_18, canCalculateTotalTvl, CONST_ID,
   EXCLUSIVE_REWARD_POOL,
   getFarmToken,
   isPsAddress, TOTAL_TVL_FROM, TVL_WARN, UNI_V3_WBTC_WETH,
@@ -30,6 +30,7 @@ export function createTvl(address: Address, block: ethereum.Block, transaction: 
       let totalSupply = BigInt.zero()
       let price = BigDecimal.zero()
       let sharePrice = BI_18
+      tvl.sequenceId = tvlSequenceId().lastSequenceId
 
       if (isPsAddress(vault.id)) {
         totalSupply = fetchContractTotalSupply(EXCLUSIVE_REWARD_POOL)
@@ -93,6 +94,7 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, transa
       tvl.sharePrice = sharePrice
       tvl.priceUnderlying = price
       tvl.value = value
+      tvl.sequenceId = tvlSequenceId().lastSequenceId
 
       if (tvl.value.ge(TVL_WARN)) {
         return value;
@@ -150,4 +152,15 @@ export function createTvlV2(totalTvl: BigDecimal, block: ethereum.Block): void {
     totalTvlHistory.createAtBlock = block.number
     totalTvlHistory.save()
   }
+}
+
+export function tvlSequenceId(): TvlSequnceId {
+  let tvlSequenceId = TvlSequnceId.load(CONST_ID)
+  if (!tvlSequenceId) {
+    tvlSequenceId = new TvlSequnceId(CONST_ID)
+    tvlSequenceId.lastSequenceId = BigInt.zero();
+  }
+  tvlSequenceId.lastSequenceId = tvlSequenceId.lastSequenceId.plus(BigInt.fromString('1'))
+  tvlSequenceId.save()
+  return tvlSequenceId;
 }

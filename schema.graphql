@@ -57,9 +57,15 @@ type Tvl @entity {
   totalSupply: BigInt!
   value: BigDecimal!
   priceUnderlying: BigDecimal!
+  sequenceId: BigInt!
   sharePrice: BigInt!
   timestamp: BigInt!
   createAtBlock: BigInt!
+}
+
+type TvlSequnceId @entity {
+  id: ID!
+  lastSequenceId: BigInt!
 }
 
 type Pool @entity {
