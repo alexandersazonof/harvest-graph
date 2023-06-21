@@ -5,8 +5,8 @@ import {
 } from "../generated/templates/VaultListener/VaultContract";
 import { createTvl } from "./types/Tvl";
 import { createUserBalance } from "./types/UserBalance";
-import { Invest } from "../generated/Controller/VaultContract";
 import { Transfer } from '../generated/Storage/ERC20';
+import { Invest } from '../generated/Storage/VaultContract';
 
 export function handleDeposit(event: Deposit): void {
   // createTvl(event.address, event.block, event.transaction)

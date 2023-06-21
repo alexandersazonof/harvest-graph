@@ -1,4 +1,3 @@
-import { AddVaultAndStrategyCall, SharePriceChangeLog } from "../generated/Controller/Controller";
 import { Vault } from "../generated/schema";
 import { loadOrCreateVault } from "./types/Vault";
 import { pow } from "./utils/MathUtils";
@@ -7,6 +6,7 @@ import { calculateAndSaveApyAutoCompound } from "./types/Apy";
 import { BigInt } from "@graphprotocol/graph-ts";
 import { loadOrCreateStrategy } from "./types/Strategy";
 import { loadOrCreateSharePrice } from "./types/SharePrice";
+import { AddVaultAndStrategyCall, SharePriceChangeLog } from '../generated/Storage/ControllerContract';
 
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {

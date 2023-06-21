@@ -1,5 +1,5 @@
 import { Address } from "@graphprotocol/graph-ts";
-import { ControllerContract } from "../../generated/Controller/ControllerContract";
+import { ControllerContract } from '../../generated/Storage/ControllerContract';
 
 export function getStore(address: Address): Address {
   const controller = ControllerContract.bind(address)

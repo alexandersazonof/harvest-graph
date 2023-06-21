@@ -1,6 +1,6 @@
-import { ERC20 } from "../../generated/Controller/ERC20";
 import { Address, BigInt } from "@graphprotocol/graph-ts";
 import { UNKNOWN } from "./Constant";
+import { ERC20 } from '../../generated/Storage/ERC20';
 
 
 export function fetchContractName(address: Address): string {

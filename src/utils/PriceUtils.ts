@@ -16,7 +16,6 @@ import { Token, Vault } from "../../generated/schema";
 import { UniswapV2PairContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV2PairContract";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
 import { BalancerVaultContract } from "../../generated/templates/VaultListener/BalancerVaultContract";
-import { ERC20 } from "../../generated/Controller/ERC20";
 import { CurveVaultContract } from "../../generated/templates/VaultListener/CurveVaultContract";
 import { CurveMinterContract } from "../../generated/templates/VaultListener/CurveMinterContract";
 import { getUniswapPoolV3ByVault } from "./UniswapV3PoolUtils";
@@ -26,6 +25,7 @@ import { pow, powBI } from "./MathUtils";
 import { NotionalToken } from "../../generated/templates/VaultListener/NotionalToken";
 import { NotionalOracle } from "../../generated/templates/VaultListener/NotionalOracle";
 import { isBalancer, isBalancerContract, isCurve, isLpUniPair, isNotional, isUniswapV3 } from "./PlatformUtils";
+import { ERC20 } from '../../generated/Storage/ERC20';
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {

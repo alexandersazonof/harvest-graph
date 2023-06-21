@@ -1,12 +1,12 @@
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { AutoStake, UserBalance, UserBalanceHistory, UserTransaction, Vault } from "../../generated/schema";
 import { VaultContract } from "../../generated/templates/VaultListener/VaultContract";
-import { ERC20 } from "../../generated/Controller/ERC20";
 import { pow } from "../utils/MathUtils";
 import { BD_18, BD_ONE, BD_TEN, BD_ZERO, BI_18, FARM_TOKEN_MAINNET, FARM_TOKEN_MATIC, I_FARM_TOKEN } from "../utils/Constant";
-import { AutoStakeContract } from "../../generated/templates/AutoStake/AutoStakeContract";
 import { isIFarm } from "../utils/PlatformUtils";
 import { getTransactionType, UNKNOWN_TRANSACTION_TYPE } from "../utils/UserBalanceUtils";
+import { ERC20 } from '../../generated/Storage/ERC20';
+import { AutoStakeContract } from '../../generated/templates/AutoStakeListner/AutoStakeContract';
 
 export function createUserBalance(vaultAddress: Address, amount: BigInt, beneficary: Address, tx: ethereum.Transaction, block: ethereum.Block, isDeposit: boolean): void {
   const vault = Vault.load(vaultAddress.toHex())
