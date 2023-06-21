@@ -1,5 +1,13 @@
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
-import { TotalTvl, TotalTvlHistory, TotalTvlHistoryV2, Tvl, TvlSequnceId, Vault } from '../../generated/schema';
+import {
+  TotalTvl,
+  TotalTvlCount,
+  TotalTvlHistory,
+  TotalTvlHistoryV2,
+  Tvl, TvlCount,
+  TvlSequnceId,
+  Vault,
+} from '../../generated/schema';
 import { fetchContractDecimal, fetchContractTotalSupply } from "../utils/ERC20Utils";
 import { getPriceByVault, getPriceForCoin } from "../utils/PriceUtils";
 import {
@@ -58,6 +66,7 @@ export function createTvl(address: Address, block: ethereum.Block, transaction: 
       if (tvl.value.ge(TVL_WARN)) {
         return null;
       }
+      totalTvlCount(vault.id);
       tvl.save()
 
       if (canCalculateTotalTvl(vault.id)) {
@@ -96,6 +105,7 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, transa
       tvl.value = value
       tvl.sequenceId = tvlSequenceId().lastSequenceId
 
+      totalTvlCount(vault.id);
       if (tvl.value.ge(TVL_WARN)) {
         return value;
       }
@@ -111,6 +121,18 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, transa
     return value
   }
   return BigDecimal.zero()
+}
+
+export function totalTvlCount(vault: string): TvlCount {
+  let totalCount = TvlCount.load(vault)
+  if (!totalCount) {
+    totalCount = new TvlCount(vault);
+    totalCount.length = BigInt.zero();
+  }
+
+  totalCount.length = totalCount.length.plus(BigInt.fromString('1'));
+  totalCount.save();
+  return totalCount;
 }
 
 
