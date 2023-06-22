@@ -43,11 +43,11 @@ dataSources:
           file: ./abis/notional/nToken.json
         - name: NotionalOracle
           file: ./abis/notional/UniswapAnchoredView.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       callHandlers:
         - function: setController(address)
           handler: handleSetController
-#      blockHandlers:
-#        - handler: handleBlock
       file: ./src/StorageListener.ts
     network: mainnet
   - kind: ethereum
@@ -72,6 +72,8 @@ dataSources:
           file: ./abis/harvest/PotPool.json
         - name: VaultContract
           file: ./abis/Vault.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: DeploymentCompleted(string)
           handler: handleDeploymentCompleted
@@ -94,6 +96,8 @@ dataSources:
           file: ./abis/ERC20.json
         - name: UniswapV3FactoryContract
           file: ./abis/uniswap/UniswapV3Factory.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       callHandlers:
         - function: createPool(address,address,uint24)
           handler: handleCreatePool
@@ -123,6 +127,8 @@ dataSources:
           file: ./abis/Vault.json
         - name: UniswapV3VaultContract
           file: ./abis/uniswap/UniswapV3Vault.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       callHandlers:
         - function: notifyPools(uint256[],address[],uint256)
           handler: handleNotifyPools
@@ -154,6 +160,8 @@ dataSources:
           file: ./abis/Vault.json
         - name: UniswapV3VaultContract
           file: ./abis/uniswap/UniswapV3Vault.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       callHandlers:
         - function: notifyPools(uint256[],address[],uint256)
           handler: handlePotNotifyPools
@@ -183,6 +191,8 @@ dataSources:
           file: ./abis/Vault.json
         - name: UniswapV3VaultContract
           file: ./abis/uniswap/UniswapV3Vault.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       callHandlers:
         - function: notifyPools(uint256[],address[],uint256)
           handler: handlePotNotifyPools
@@ -232,6 +242,8 @@ dataSources:
           file: ./abis/notional/nToken.json
         - name: NotionalOracle
           file: ./abis/notional/UniswapAnchoredView.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded
@@ -279,6 +291,8 @@ templates:
           file: ./abis/notional/nToken.json
         - name: NotionalOracle
           file: ./abis/notional/UniswapAnchoredView.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: SharePriceChangeLog(indexed address,indexed
             address,uint256,uint256,uint256)
@@ -323,6 +337,8 @@ templates:
           file: ./abis/notional/nToken.json
         - name: NotionalOracle
           file: ./abis/notional/UniswapAnchoredView.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: Deposit(indexed address,uint256)
           handler: handleDeposit
@@ -373,6 +389,8 @@ templates:
           file: ./abis/notional/nToken.json
         - name: NotionalOracle
           file: ./abis/notional/UniswapAnchoredView.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: Staked(indexed address,uint256,uint256,uint256,uint256,uint256)
           handler: handleStaked
@@ -417,6 +435,8 @@ templates:
           file: ./abis/notional/nToken.json
         - name: NotionalOracle
           file: ./abis/notional/UniswapAnchoredView.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded
@@ -459,6 +479,8 @@ templates:
           file: ./abis/notional/nToken.json
         - name: NotionalOracle
           file: ./abis/notional/UniswapAnchoredView.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: RewardAdded(address,uint256)
           handler: handleRewardAdded
@@ -501,6 +523,8 @@ templates:
           file: ./abis/notional/nToken.json
         - name: NotionalOracle
           file: ./abis/notional/UniswapAnchoredView.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: SharePriceChangeLiquidation(uint256,uint256,uint256,uint256)
           handler: handleSharePriceChangeLiquidation
@@ -523,9 +547,34 @@ templates:
           file: ./abis/ERC20.json
         - name: VaultContract
           file: ./abis/Vault.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
       file: ./src/IFarmVaultListener.ts
     network: mainnet
-
+  - kind: ethereum/contract
+    name: StrategyListener
+    source:
+      abi: StrategyContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Strategy
+      abis:
+        - name: VaultFarmContract
+          file: ./abis/harvest/VaultFarm.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: VaultContract
+          file: ./abis/Vault.json
+        - name: StrategyContract
+          file: ./abis/StrategyBase.json
+      eventHandlers:
+        - event: ProfitLogInReward(uint256,uint256,uint256)
+          handler: handleProfitLogInReward
+      file: ./src/StrategyListener.ts
+    network: mainnet

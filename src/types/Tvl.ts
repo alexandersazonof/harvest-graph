@@ -38,7 +38,7 @@ export function createTvl(address: Address, block: ethereum.Block, transaction: 
       let totalSupply = BigInt.zero()
       let price = BigDecimal.zero()
       let sharePrice = BI_18
-      tvl.sequenceId = tvlSequenceId().lastSequenceId
+      tvl.sequenceId = tvlSequenceId(vault.id).lastSequenceId
 
       if (isPsAddress(vault.id)) {
         totalSupply = fetchContractTotalSupply(EXCLUSIVE_REWARD_POOL)
@@ -103,7 +103,7 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, transa
       tvl.sharePrice = sharePrice
       tvl.priceUnderlying = price
       tvl.value = value
-      tvl.sequenceId = tvlSequenceId().lastSequenceId
+      tvl.sequenceId = tvlSequenceId(vault.id).lastSequenceId
 
       totalTvlCount(vault.id);
       if (tvl.value.ge(TVL_WARN)) {
@@ -176,10 +176,10 @@ export function createTvlV2(totalTvl: BigDecimal, block: ethereum.Block): void {
   }
 }
 
-export function tvlSequenceId(): TvlSequnceId {
-  let tvlSequenceId = TvlSequnceId.load(CONST_ID)
+export function tvlSequenceId(address: string): TvlSequnceId {
+  let tvlSequenceId = TvlSequnceId.load(address)
   if (!tvlSequenceId) {
-    tvlSequenceId = new TvlSequnceId(CONST_ID)
+    tvlSequenceId = new TvlSequnceId(address)
     tvlSequenceId.lastSequenceId = BigInt.zero();
   }
   tvlSequenceId.lastSequenceId = tvlSequenceId.lastSequenceId.plus(BigInt.fromString('1'))
