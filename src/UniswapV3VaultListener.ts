@@ -3,6 +3,8 @@ import { calculateAndSaveApyAutoCompound } from "./types/Apy";
 import { Vault } from "../generated/schema";
 import { BD_TEN, NULL_ADDRESS } from "./utils/Constant";
 import { pow } from "./utils/MathUtils";
+import { Transfer } from '../generated/Storage/ERC20';
+import { createTvl } from "./types/Tvl";
 import { loadOrCreateSharePrice } from "./types/SharePrice";
 
 export function handleSharePriceChangeLiquidation(event: SharePriceChangeLiquidation): void {
@@ -36,4 +38,8 @@ export function handleSharePriceChangeLiquidation(event: SharePriceChangeLiquida
       block
     )
   }
+}
+
+export function handleTransfer(event: Transfer): void {
+  createTvl(event.address, event.block, event.transaction)
 }
