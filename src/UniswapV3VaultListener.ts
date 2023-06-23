@@ -6,6 +6,7 @@ import { pow } from "./utils/MathUtils";
 import { Transfer } from '../generated/Storage/ERC20';
 import { createTvl } from "./types/Tvl";
 import { loadOrCreateSharePrice } from "./types/SharePrice";
+import { SharePriceChangeTrading } from '../generated/Storage/UniswapV3VaultContract';
 
 export function handleSharePriceChangeLiquidation(event: SharePriceChangeLiquidation): void {
   const address = event.address
@@ -41,5 +42,9 @@ export function handleSharePriceChangeLiquidation(event: SharePriceChangeLiquida
 }
 
 export function handleTransfer(event: Transfer): void {
+  createTvl(event.address, event.block, event.transaction)
+}
+
+export function handleSharePriceChangeTrading(event: SharePriceChangeTrading): void {
   createTvl(event.address, event.block, event.transaction)
 }
