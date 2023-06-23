@@ -530,6 +530,8 @@ templates:
           handler: handleSharePriceChangeLiquidation
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
+        - event: SharePriceChangeTrading(uint256,uint256,uint256,uint256)
+          handler: handleSharePriceChangeTrading
       file: ./src/UniswapV3VaultListener.ts
     network: mainnet
   - kind: ethereum/contract
