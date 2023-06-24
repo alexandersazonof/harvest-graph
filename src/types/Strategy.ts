@@ -18,5 +18,6 @@ export function loadOrCreateStrategy(strategyAddress: Address, block: ethereum.B
 }
 
 export function getVaultAddress(address: Address): Address {
-  return StrategyContract.bind(address).vault();
+  const tryVault = StrategyContract.bind(address).try_vault();
+  return tryVault.reverted ? Address.zero() : tryVault.value;
 }
