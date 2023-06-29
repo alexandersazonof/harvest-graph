@@ -122,7 +122,7 @@ export const CURVE_CONTRACT_NAME = 'Curve'.toLowerCase()
 export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
 export const NOTIONAL_CONTRACT_NAME = 'nToken'.toLowerCase()
 export const I_FARM_NAME = 'iFARM'.toLowerCase()
-
+export const UNISWAP_V3_STETH_WETH = '0x65383Abd40f9f831018dF243287F7AE3612c62AC'.toLowerCase();
 export const UNISWAP_V3_FEES = [
   '3000',
   '5000',
@@ -150,9 +150,25 @@ export const NULL_ADDRESS = Address.fromString('0x000000000000000000000000000000
 export const LV_USD_3_CRV = '0xD86B672D1FcaE8667d2be188dB02846Cb3D7F8ae'.toLowerCase()
 export const PETH_CRV = '0x4cf4f433e359a343648c480b2f3952fd64616a9a'.toLowerCase();
 export const ETH_BALANCER_POOL = '0x80ef5ef7099c69bc9fcf952217240331f96bdf5f'.toLowerCase();
+export const OETH_ETH = '0x924e022Ef8636FfA5971215e6Aac2652f7e9606e'.toLowerCase();
 export const USD_BALANCER_POOL = '0x85472c764Ca52B189eB09497B683B2FD9cD79213'.toLowerCase();
 
 export const WETH = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2');
+
+export const ETH_LIST = [
+  PETH_CRV,
+  ETH_BALANCER_POOL,
+  OETH_ETH
+]
+
+export function isEth(address: string): boolean {
+  for (let i=0;i<ETH_LIST.length;i++) {
+    if (address.toLowerCase() == ETH_LIST[i]) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export function isStableCoin(address: string): boolean {
   if (dataSource.network() == 'mainnet') {
