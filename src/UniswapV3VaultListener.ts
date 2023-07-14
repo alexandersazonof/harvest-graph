@@ -22,7 +22,7 @@ export function handleSharePriceChangeLiquidation(event: SharePriceChangeLiquida
   if (vault != null) {
     if (!vault.lastShareTimestamp.isZero()) {
       const sharePriceNumber = diffSharePrice.divDecimal(pow(BD_TEN, vault.decimal.toI32()))
-      const apy = calculateAndSaveApyAutoCompound(`${event.transaction.hash.toHex()}-${vault.id}`, sharePriceNumber, diffTimestamp, address.toHex(), event.block)
+      const apy = calculateAndSaveApyAutoCompound(`${event.transaction.hash.toHex()}-${vault.id}`, sharePriceNumber, diffTimestamp, vault, event.block)
     }
 
     vault.lastSharePrice = event.params.newPrice

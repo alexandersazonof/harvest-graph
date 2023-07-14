@@ -1,4 +1,4 @@
-import { ApyAutoCompound, ApyReward, Pool, Vault } from "../../generated/schema";
+import { ApyAutoCompound, ApyReward, GeneralApy, Pool, Vault } from '../../generated/schema';
 import { Address, BigDecimal, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
 import { getPriceByVault, getPriceForCoin } from "../utils/PriceUtils";
 import {
@@ -114,7 +114,9 @@ export function saveApyReward(
 
       if (apy.apy.gt(BigDecimal.zero())) {
         const countApy = vault.apyRewardCount.plus(BigInt.fromI32(1))
-        vault.apyReward = apy.apy.plus(vault.apyReward).div(countApy.toBigDecimal())
+        vault.apyReward = apy.apy;
+        vault.apy = vault.apyAutoCompound.plus(vault.apyReward)
+        calculateGeneralApy(vault, block);
         vault.apyRewardCount = countApy
         vault.save()
       }
@@ -122,7 +124,7 @@ export function saveApyReward(
   }
 }
 
-export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigDecimal, diffTimestamp: BigInt, vaultAddress: string, block: ethereum.Block): BigDecimal {
+export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigDecimal, diffTimestamp: BigInt, vault: Vault, block: ethereum.Block): BigDecimal {
   let apyAutoCompound = ApyAutoCompound.load(id)
   if (apyAutoCompound == null) {
     apyAutoCompound = new ApyAutoCompound(id)
@@ -130,16 +132,34 @@ export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigD
     apyAutoCompound.timestamp = block.timestamp
     apyAutoCompound.apr = calculateAprAutoCompound(diffSharePrice, diffTimestamp.toBigDecimal())
     apyAutoCompound.apy = calculateApy(apyAutoCompound.apr)
-    apyAutoCompound.vault = vaultAddress
+    apyAutoCompound.vault = vault.id
     apyAutoCompound.diffSharePrice = diffSharePrice
 
     if (apyAutoCompound.apy.le(BigDecimal.zero()) || apyAutoCompound.apy.gt(BIG_APY_BD)) {
       // don't save 0 APY && more 5000
-      log.log(log.Level.ERROR, `Can not save APY < 0 OR APY > 5000 for vault ${vaultAddress}`)
+      log.log(log.Level.ERROR, `Can not save APY < 0 OR APY > 5000 for vault ${vault.id}`)
       return BigDecimal.zero();
     }
 
     apyAutoCompound.save()
+    vault.apyAutoCompound = apyAutoCompound.apy;
+    vault.apy = vault.apyAutoCompound.plus(vault.apyReward)
+    calculateGeneralApy(vault, block);
   }
   return apyAutoCompound.apy
+}
+
+export function calculateGeneralApy(vault: Vault, block: ethereum.Block): void {
+  const id = `${vault.id}-${block.number}`;
+  let generalApy = GeneralApy.load(id)
+  if (!generalApy) {
+    generalApy = new GeneralApy(id);
+    generalApy.createAtBlock = block.number
+    generalApy.timestamp = block.timestamp;
+    generalApy.apy = vault.apy;
+    generalApy.vault = vault.id;
+    generalApy.apyReward = vault.apyReward
+    generalApy.apyAutoCompound = vault.apyAutoCompound
+    generalApy.save();
+  }
 }

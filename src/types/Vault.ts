@@ -26,6 +26,7 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     vault.apyAutoCompoundCount = BigInt.zero()
     vault.apyReward = BigDecimal.zero()
     vault.apyRewardCount = BigInt.zero()
+    vault.apy = BigDecimal.zero()
     vault.skipFirstApyReward = true
     if (isUniswapV3(vault.name)) {
       vault.isUniswapV3 = true

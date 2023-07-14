@@ -26,6 +26,7 @@ type Vault @entity {
   apyAutoCompoundCount: BigInt!
   apyReward: BigDecimal!
   apyRewardCount: BigInt!
+  apy: BigDecimal!
   isUniswapV3: Boolean
   isIFarm: Boolean
   tvl: BigDecimal!
@@ -144,6 +145,17 @@ type ApyAutoCompound @entity {
   apy: BigDecimal!
   apr: BigDecimal!
   diffSharePrice: BigDecimal!
+  timestamp: BigInt!
+  createAtBlock: BigInt!
+}
+
+type GeneralApy @entity {
+  "transactionhash-vaultaddress"
+  id: ID!
+  apy: BigDecimal!
+  apyAutoCompound: BigDecimal!
+  apyReward: BigDecimal!
+  vault: Vault!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }
