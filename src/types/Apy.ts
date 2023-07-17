@@ -102,7 +102,7 @@ export function saveApyReward(
       }
 
       if (apy.apy.le(BigDecimal.zero()) || apy.apy.gt(BIG_APY_BD)) {
-        // don't save 0 APY && more 5000
+        // don't save 0 APY && more 1000
         log.log(log.Level.ERROR, `Can not save APY < 0 OR APY > 5000 for pool ${poolAddress.toHex()}`)
         return;
       }
@@ -136,8 +136,8 @@ export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigD
     apyAutoCompound.diffSharePrice = diffSharePrice
 
     if (apyAutoCompound.apy.le(BigDecimal.zero()) || apyAutoCompound.apy.gt(BIG_APY_BD)) {
-      // don't save 0 APY && more 5000
-      log.log(log.Level.ERROR, `Can not save APY < 0 OR APY > 5000 for vault ${vault.id}`)
+      // don't save 0 APY && more 1000
+      log.log(log.Level.ERROR, `Can not save APY < 0 OR APY > 1000 for vault ${vault.id}`)
       return BigDecimal.zero();
     }
 

@@ -130,7 +130,7 @@ export const UNISWAP_V3_FEES = [
   '10000'
 ]
 
-export const BIG_APY_BD = BigDecimal.fromString('5000');
+export const BIG_APY_BD = BigDecimal.fromString('1000');
 
 
 
