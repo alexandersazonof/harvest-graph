@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, log } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, ethereum, log } from '@graphprotocol/graph-ts';
 import { OracleContract } from "../../generated/templates/VaultListener/OracleContract";
 import {
   BD_18,
@@ -26,6 +26,7 @@ import { NotionalToken } from "../../generated/templates/VaultListener/NotionalT
 import { NotionalOracle } from "../../generated/templates/VaultListener/NotionalOracle";
 import { isBalancer, isBalancerContract, isCurve, isLpUniPair, isNotional, isUniswapV3 } from "./PlatformUtils";
 import { ERC20 } from '../../generated/Storage/ERC20';
+import { createPriceFeed } from '../types/PriceFeed';
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
@@ -45,72 +46,95 @@ export function getPriceForCoin(address: Address, block: number): BigInt {
   return DEFAULT_PRICE
 }
 
-export function getPriceByVault(vault: Vault, block: number): BigDecimal {
+export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal {
+  let tempPrice = BigDecimal.zero();
 
   if (isPsAddress(vault.id)) {
-    const price = getPriceForCoin(getFarmToken(), block)
+    const price = getPriceForCoin(getFarmToken(), block.number.toI32())
     if (!price.isZero()) {
-      return price.divDecimal(BD_18)
+      tempPrice = price.divDecimal(BD_18)
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
     }
     return BigDecimal.zero()
   }
   const underlyingAddress = vault.underlying
 
   if (underlyingAddress == NULL_ADDRESS.toHex()) {
-    let price = getPriceForCoin(Address.fromString(vault.id), block)
+    let price = getPriceForCoin(Address.fromString(vault.id), block.number.toI32())
     if (!price.isZero()) {
-      return price.divDecimal(BD_18)
+      tempPrice = price.divDecimal(BD_18)
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
     }
   }
 
-  let price = getPriceForCoin(Address.fromString(underlyingAddress), block)
+  let price = getPriceForCoin(Address.fromString(underlyingAddress), block.number.toI32())
   if (!price.isZero()) {
-    return price.divDecimal(BD_18)
+    tempPrice = price.divDecimal(BD_18)
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice;
   }
 
   // is from uniSwapV3 pools
   if (isUniswapV3(vault.name)) {
-    return getPriceForUniswapV3(vault, block)
+    tempPrice = getPriceForUniswapV3(vault, block.number.toI32())
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice;
   }
 
   if (vault.id.toLowerCase() == LV_USD_3_CRV || vault.id.toLowerCase() == USD_BALANCER_POOL) {
+    createPriceFeed(vault, BD_ONE, block);
     return BD_ONE;
   }
 
   if (isEth(vault.id.toLowerCase())) {
-    return getPriceForCoin(WETH, block).divDecimal(BD_18);
+    tempPrice = getPriceForCoin(WETH, block.number.toI32()).divDecimal(BD_18);
+    createPriceFeed(vault, tempPrice, block);
+    return tempPrice;
   }
 
   const underlying = Token.load(underlyingAddress)
   if (underlying != null) {
     if (isLpUniPair(underlying.name)) {
-      const tempPrice = getPriceForCoin(Address.fromString(underlyingAddress), block)
-      if (tempPrice.gt(DEFAULT_PRICE)) {
-        return tempPrice.divDecimal(BD_18)
+      const tempInPrice = getPriceForCoin(Address.fromString(underlyingAddress), block.number.toI32())
+      if (tempInPrice.gt(DEFAULT_PRICE)) {
+        tempPrice = tempInPrice.divDecimal(BD_18)
+        createPriceFeed(vault, tempPrice, block);
+        return tempPrice;
       }
-      return getPriceLpUniPair(underlying.id, block)
+      tempPrice = getPriceLpUniPair(underlying.id, block.number.toI32())
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
     }
 
     if (isCurve(underlying.name)) {
-      const tempPrice = getPriceForCoin(Address.fromString(underlying.id), block)
-      if (!tempPrice.isZero()) {
-        return tempPrice.divDecimal(BD_18)
+      const tempInPrice = getPriceForCoin(Address.fromString(underlying.id), block.number.toI32())
+      if (!tempInPrice.isZero()) {
+        tempPrice = tempInPrice.divDecimal(BD_18)
+        createPriceFeed(vault, tempPrice, block);
+        return tempPrice;
       }
 
-      return getPriceForCurve(underlyingAddress, block)
+      tempPrice = getPriceForCurve(underlyingAddress, block.number.toI32())
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
     }
 
     if (isNotional(underlying.name)) {
-      return getPriceForNotional(underlying, block)
+      tempPrice = getPriceForNotional(underlying, block.number.toI32())
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
     }
 
     if (isBalancer(underlying.name) || isBalancerContract(Address.fromString(underlying.id))) {
-      return getPriceForBalancer(underlying.id, block)
+      tempPrice = getPriceForBalancer(underlying.id, block.number.toI32())
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
     }
   }
 
   return BigDecimal.zero()
-
 }
 
 function getPriceForNotional(underlying: Token, block: number): BigDecimal {

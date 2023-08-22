@@ -71,7 +71,7 @@ export function saveApyReward(
         apy.rewardRate = rewardRate
       }
 
-      price = getPriceByVault(vault, block.number.toI32())
+      price = getPriceByVault(vault, block)
       apy.periodFinish = periodFinish
       apy.rewardAmount = rewardAmount
       apy.rewardForPeriod = BigDecimal.zero()

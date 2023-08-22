@@ -46,7 +46,7 @@ export function createTvl(address: Address, block: ethereum.Block, transaction: 
       } else {
         totalSupply = fetchContractTotalSupply(vaultAddress)
         sharePrice = fetchPricePerFullShare(vaultAddress)
-        price = getPriceByVault(vault, block.number.toI32())
+        price = getPriceByVault(vault, block)
       }
 
       tvl.totalSupply = totalSupply
