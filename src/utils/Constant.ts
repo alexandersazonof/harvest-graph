@@ -106,7 +106,10 @@ export const SKIP_TOTAL_TVL = [
   "0xd3093e3efbe00f010e8f5efe3f1cb5d9b7fe0eb1",
   // iFarm
   "0x1571ed0bed4d987fe2b498ddbae7dfa19519f651",
-  "0xfb387177ff9db15294f7aebb1ea1e941f55695bc"
+  "0xfb387177ff9db15294f7aebb1ea1e941f55695bc",
+  "0xd7b17297b9884aa73bf5e6e39e3cec107ffe6b17",
+  "0x12db4a4c442944a10ed153db64c500beb006039f",
+  "0x29ec64560ab14d3166222bf07c3f29c4916e0027",
 ]
 
 export const LP_UNI_PAIR_CONTRACT_NAME = [
