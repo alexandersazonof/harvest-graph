@@ -53,10 +53,10 @@ export const STABLE_COIN_ARRAY_MATIC = [
 export const PS_ADDRESSES_MAINNET = [
   '0x1571ed0bed4d987fe2b498ddbae7dfa19519f651'.toLowerCase(),
   '0xd3093e3efbe00f010e8f5efe3f1cb5d9b7fe0eb1'.toLowerCase(),
-  '0x8f5adC58b32D4e5Ca02EAC0E293D35855999436C'.toLowerCase(),
+  '0x8f5adc58b32d4e5ca02eac0e293d35855999436c'.toLowerCase(),
   '0xa0246c9032bc3a600820415ae600c6388619a14d'.toLowerCase(),
-  '0x25550Cccbd68533Fa04bFD3e3AC4D09f9e00Fc50'.toLowerCase(),
-  '0x59258F4e15A5fC74A7284055A8094F58108dbD4f'.toLowerCase(),
+  '0x25550cccbd68533fa04bfd3e3ac4d09f9e00fc50'.toLowerCase(),
+  '0x59258f4e15a5fc74a7284055a8094f58108dbd4f'.toLowerCase(),
 ]
 
 export const PS_ADDRESSES_MATIC = [
