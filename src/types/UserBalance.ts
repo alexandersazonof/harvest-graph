@@ -50,6 +50,8 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
     } else {
       userBalance.value = value
     }
+    userBalance.poolBalance = poolBalance
+    userBalance.vaultBalance = vaultBalance
 
     userBalance.save()
 
@@ -61,7 +63,19 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
     const vaultAddressString = vault.id
     const transactionType = getTransactionType(isDeposit)
 
-    createBalanceHistory(userBalanceHistoryId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, userBalance.value, userBalance.additionalValues)
+    createBalanceHistory(
+      userBalanceHistoryId,
+      vault,
+      timestamp,
+      createdAtBlock,
+      userAddress,
+      transactionType,
+      sharePrice,
+      userBalance.value,
+      userBalance.additionalValues,
+      poolBalance,
+      vaultBalance
+    )
     createUserTransaction(userTransactionId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, amount)
 
   }
@@ -89,6 +103,8 @@ export function createIFarmUserBalance(vaultAddress: Address, beneficary: Addres
       userBalance.value = BigDecimal.zero()
       userBalance.userAddress = beneficary.toHex()
       userBalance.additionalValues = [BigDecimal.zero(), BigDecimal.zero()]
+      userBalance.poolBalance = BigDecimal.zero()
+      userBalance.vaultBalance = BigDecimal.zero()
     }
 
     userBalance.additionalValues = [vaultBalance, userBalance.additionalValues[1]]
@@ -107,7 +123,19 @@ export function createIFarmUserBalance(vaultAddress: Address, beneficary: Addres
     const vaultAddressString = vault.id
     const transactionType = UNKNOWN_TRANSACTION_TYPE
 
-    createBalanceHistory(userBalanceHistoryId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, userBalance.value, userBalance.additionalValues)
+    createBalanceHistory(
+      userBalanceHistoryId,
+      vault,
+      timestamp,
+      createdAtBlock,
+      userAddress,
+      transactionType,
+      sharePrice,
+      userBalance.value,
+      userBalance.additionalValues,
+      BigDecimal.zero(),
+      BigDecimal.zero()
+    )
     createUserTransaction(userTransactionId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, vaultBalance.digits)
 
   }
@@ -140,6 +168,8 @@ export function createUserBalanceForFarm(amount: BigInt, beneficary: Address, tx
       userBalance.value = BigDecimal.zero()
       userBalance.additionalValues = [BigDecimal.zero(), BigDecimal.zero()]
       userBalance.userAddress = beneficary.toHex()
+      userBalance.poolBalance = BigDecimal.zero()
+      userBalance.vaultBalance = BigDecimal.zero()
     }
 
     userBalance.additionalValues = [userBalance.additionalValues[0], value]
@@ -154,30 +184,34 @@ export function createUserBalanceForFarm(amount: BigInt, beneficary: Address, tx
     const vaultAddress = vault.id
     const transactionType = getTransactionType(isDeposit)
 
-    createBalanceHistory(userBalanceHistoryId, vaultAddress, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, userBalance.value, userBalance.additionalValues)
+    createBalanceHistory(userBalanceHistoryId, vault, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, userBalance.value, userBalance.additionalValues, BigDecimal.zero(), BigDecimal.zero())
     createUserTransaction(userTransactionId, vaultAddress, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, amount)
   }
 }
 
 function createBalanceHistory(
   id: string,
-  vault: string,
+  vault: Vault,
   timestamp: BigInt,
   createdAtBlock: BigInt,
   userAddress: string,
   type: string,
   sharePrice: BigDecimal,
   value: BigDecimal,
-  additionalValues: BigDecimal[]
+  additionalValues: BigDecimal[],
+  poolBalance: BigDecimal,
+  vaultBalance: BigDecimal,
   ): void {
   const userBalanceHistory = new UserBalanceHistory(id)
   userBalanceHistory.createAtBlock = createdAtBlock
   userBalanceHistory.timestamp = timestamp
   userBalanceHistory.userAddress = userAddress
-  userBalanceHistory.vault = vault
+  userBalanceHistory.vault = vault.id
   userBalanceHistory.transactionType = type
   userBalanceHistory.sharePrice = sharePrice
   userBalanceHistory.value = value
+  userBalanceHistory.poolBalance = poolBalance
+  userBalanceHistory.vaultBalance = vaultBalance
   userBalanceHistory.additionalValues = additionalValues
   userBalanceHistory.save()
 }

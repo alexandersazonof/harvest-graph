@@ -73,6 +73,7 @@ export function createTvl(address: Address, block: ethereum.Block, transaction: 
         createTotalTvl(vault.tvl, tvl.value, id, block, vault.id)
       }
       vault.tvl = tvl.value
+      vault.priceUnderlying = price
       vault.save()
     }
     return tvl;
@@ -116,6 +117,7 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, transa
         createTotalTvl(vault.tvl, tvl.value, id, block, vault.id)
       }
       vault.tvl = tvl.value
+      vault.priceUnderlying = price
       vault.save()
     }
     return value
