@@ -1,9 +1,9 @@
 import {
   BALANCER_CONTRACT_NAME,
   CURVE_CONTRACT_NAME,
-  F_UNI_V3_CONTRACT_NAME, I_FARM_NAME,
-  LP_UNI_PAIR_CONTRACT_NAME, NOTIONAL_CONTRACT_NAME
-} from "./Constant";
+  F_UNI_V3_CONTRACT_NAME, FARM_CONTRACTS, I_FARM_NAME,
+  LP_UNI_PAIR_CONTRACT_NAME, NOTIONAL_CONTRACT_NAME,
+} from './Constant';
 import { Address } from "@graphprotocol/graph-ts";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
 
@@ -40,5 +40,13 @@ export function isNotional(name: string): boolean {
 
 export function isIFarm(name: string): boolean {
   return !!name.toLowerCase().startsWith(I_FARM_NAME);
+}
 
+export function isFarmContract(address: string): boolean {
+  for (let i = 0; i < FARM_CONTRACTS.length; i++) {
+    if (address == FARM_CONTRACTS[i]) {
+      return true;
+    }
+  }
+  return false;
 }

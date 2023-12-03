@@ -17,6 +17,8 @@ export const BD_ONE = BigDecimal.fromString('1')
 export const BD_TEN = BigDecimal.fromString('10')
 export const BD_ONE_HUNDRED = BigDecimal.fromString('100')
 export const CONST_ID = '1';
+export const TWO_WEEKS_IN_SECONDS = BigInt.fromString('1209600');
+// export const TWO_WEEKS_IN_SECONDS = BigInt.fromString('1209600');
 
 
 export const TOTAL_TVL_FROM = BigInt.fromString('14522503')
@@ -136,6 +138,14 @@ export const UNISWAP_V3_FEES = [
 
 export const BIG_APY_BD = BigDecimal.fromString('1000');
 
+export const FARM_CONTRACTS = [
+  // iFarm
+  '0xa0246c9032bc3a600820415ae600c6388619a14d',
+  // FARM
+  '0x1571ed0bed4d987fe2b498ddbae7dfa19519f651',
+  // Autostake
+  '0x25550cccbd68533fa04bfd3e3ac4d09f9e00fc50',
+]
 
 
 export const I_FARM_TOKEN = Address.fromString('0x1571ed0bed4d987fe2b498ddbae7dfa19519f651')

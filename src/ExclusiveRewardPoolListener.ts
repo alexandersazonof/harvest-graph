@@ -9,8 +9,10 @@ import { AutoStake } from "../generated/schema";
 import { loadOrCreateVault } from "./types/Vault";
 import { AutoStakeListner } from "../generated/templates";
 import { loadOrCreateExclusiveRewardPool } from "./types/ExclusiveRewardPool";
+import { handlerLogic } from './debug/HandlerCalculator';
 
 export function handleRewardAdded(event: RewardAdded): void {
+  handlerLogic(event.address.toHexString(), 'RewardAdded', event.transaction, event.block);
   const poolAddress = event.address
   const pool = loadOrCreateExclusiveRewardPool(poolAddress, event.block)
   const vault = loadOrCreateVault(Address.fromString(pool.vault), event.block)

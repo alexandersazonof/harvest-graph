@@ -7,8 +7,10 @@ import { Transfer } from '../generated/Storage/ERC20';
 import { createTvl } from "./types/Tvl";
 import { loadOrCreateSharePrice } from "./types/SharePrice";
 import { SharePriceChangeTrading } from '../generated/Storage/UniswapV3VaultContract';
+import { handlerLogic } from './debug/HandlerCalculator';
 
 export function handleSharePriceChangeLiquidation(event: SharePriceChangeLiquidation): void {
+  handlerLogic(event.address.toHexString(), 'SharePriceChangeLiquidation', event.transaction, event.block);
   const address = event.address
   const oldSharePrice = event.params.oldPrice
   const newSharePrice = event.params.newPrice;
@@ -42,9 +44,11 @@ export function handleSharePriceChangeLiquidation(event: SharePriceChangeLiquida
 }
 
 export function handleTransfer(event: Transfer): void {
+  handlerLogic(event.address.toHexString(), 'Transfer', event.transaction, event.block);
   createTvl(event.address, event.block, event.transaction)
 }
 
 export function handleSharePriceChangeTrading(event: SharePriceChangeTrading): void {
+  handlerLogic(event.address.toHexString(), 'SharePriceChangeTrading', event.transaction, event.block);
   createTvl(event.address, event.block, event.transaction)
 }

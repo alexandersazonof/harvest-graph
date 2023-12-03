@@ -1,5 +1,35 @@
 # Harvest sub graph 
 
+## Documentation
+
+### Logic for Storage -StorageListener.ts
+- **SetControllerCall** - Create contreoller
+
+### Logic for Controller - ControllerListener.ts
+- **SharePriceChangeLog** - Create sharePrice, APY autocompound, Vault History
+- **AddVaultAndStrategyCall** - Create vault and strategy
+
+### Logic for Vault - VaultListener.ts
+- **Transfer** - Create TVL for all vaults, create user balance history only not FARM contract(0xa0246c9032bc3a600820415ae600c6388619a14d , 0x1571ed0bed4d987fe2b498ddbae7dfa19519f651 , 0x25550cccbd68533fa04bfd3e3ac4d09f9e00fc50)
+
+### Logic for PotPool - PotPoolListener.ts
+- **RewardAdded** - Create rewards and APY rewards
+
+### Logic for NoMintPool - NoMintPoolListener.ts
+- **RewardAdded** - Create rewards and APY rewards
+
+### Logic for Autostake - AutoStakeListener.ts
+- **Staked** - Create user balance history and TVL
+- **Withdrawn** - Create user balance history and TVL
+
+
+### We don't save APY more 1000%
+
+### User balance history:
+- **Pool Balance** = pool balance / (10 ^ decimals)
+- **User Balance** = vault balance / (10 ^ decimals)
+- **Value** = pool balance + vault balance
+
 
 ## Setup
 

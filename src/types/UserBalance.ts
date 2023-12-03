@@ -14,16 +14,18 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
   if (vault != null && !isIFarm(vault.name)) {
     const vaultContract = VaultContract.bind(vaultAddress)
     const tryPricePerFullShare = vaultContract.try_getPricePerFullShare()
-    let sharePrice = BD_ONE
+    let sharePriceBD = BD_ONE
+    let sharePrice = BI_18
     if (!tryPricePerFullShare.reverted) {
-      sharePrice = tryPricePerFullShare.value.divDecimal(pow(BD_TEN, vault.decimal.toI32()))
+      sharePrice = tryPricePerFullShare.value
+      sharePriceBD = sharePrice.divDecimal(pow(BD_TEN, vault.decimal.toI32()))
     }
     let poolBalance = BigDecimal.zero()
     if (vault.pool != null) {
       const poolContract = ERC20.bind(Address.fromString(vault.pool!))
-      poolBalance = poolContract.balanceOf(beneficary).divDecimal(pow(BD_TEN, vault.decimal.toI32())).times(sharePrice)
+      poolBalance = poolContract.balanceOf(beneficary).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
     }
-    const vaultBalance = vaultContract.balanceOf(beneficary).divDecimal(pow(BD_TEN, vault.decimal.toI32())).times(sharePrice)
+    const vaultBalance = vaultContract.balanceOf(beneficary).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
     const value = vaultBalance.plus(poolBalance)
 
     const userBalanceId = `${vault.id}-${beneficary.toHex()}`
@@ -76,8 +78,7 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
       poolBalance,
       vaultBalance
     )
-    createUserTransaction(userTransactionId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, amount)
-
+    createUserTransaction(userTransactionId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePriceBD, amount)
   }
 }
 
@@ -86,12 +87,17 @@ export function createIFarmUserBalance(vaultAddress: Address, beneficary: Addres
   const vault = Vault.load(vaultAddress.toHex())
   if (vault != null) {
     const vaultContract = VaultContract.bind(vaultAddress)
+    // TODO call
     const tryPricePerFullShare = vaultContract.try_getPricePerFullShare()
-    let sharePrice = BD_ONE
+    let sharePriceBD = BD_ONE
+    let sharePrice = BI_18
     if (!tryPricePerFullShare.reverted) {
-      sharePrice = tryPricePerFullShare.value.divDecimal(pow(BD_TEN, vault.decimal.toI32()))
+      sharePrice = tryPricePerFullShare.value
+      sharePriceBD = sharePrice.divDecimal(pow(BD_TEN, vault.decimal.toI32()))
     }
-    const vaultBalance = vaultContract.balanceOf(beneficary).divDecimal(pow(BD_TEN, vault.decimal.toI32())).times(sharePrice)
+    // const vaultBalance = vaultContract.balanceOf(beneficary).divDecimal(pow(BD_TEN, vault.decimal.toI32())).times(sharePriceBD)
+    // TODO call
+    const vaultBalance = vaultContract.balanceOf(beneficary).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
 
     const userBalanceId = `${vault.id}-${beneficary.toHex()}`
     let userBalance = UserBalance.load(userBalanceId)
@@ -136,8 +142,7 @@ export function createIFarmUserBalance(vaultAddress: Address, beneficary: Addres
       BigDecimal.zero(),
       BigDecimal.zero()
     )
-    createUserTransaction(userTransactionId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, vaultBalance.digits)
-
+    createUserTransaction(userTransactionId, vaultAddressString, timestamp, createdAtBlock, userAddress, transactionType, sharePriceBD, vaultBalance.digits)
   }
 }
 
@@ -147,11 +152,14 @@ export function createUserBalanceForFarm(amount: BigInt, beneficary: Address, tx
   if (vault != null ) {
     const userBalanceId = `${vault.id}-${beneficary.toHex()}`
     const vaultContract = VaultContract.bind(I_FARM_TOKEN)
+    // TODO call
     const trySharePrice = vaultContract.try_getPricePerFullShare()
     const sharePrice = trySharePrice.reverted
-      ? BD_18
-      : trySharePrice.value.toBigDecimal()
+      ? BI_18
+      : trySharePrice.value
+    const sharePriceBD = sharePrice.toBigDecimal()
     const autoStakeContract = AutoStakeContract.bind(autoStake);
+    // TODO call
     const tryBalanceOf = autoStakeContract.try_balanceOf(beneficary)
 
     let value = BigDecimal.zero()
@@ -185,7 +193,7 @@ export function createUserBalanceForFarm(amount: BigInt, beneficary: Address, tx
     const transactionType = getTransactionType(isDeposit)
 
     createBalanceHistory(userBalanceHistoryId, vault, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, userBalance.value, userBalance.additionalValues, BigDecimal.zero(), BigDecimal.zero())
-    createUserTransaction(userTransactionId, vaultAddress, timestamp, createdAtBlock, userAddress, transactionType, sharePrice, amount)
+    createUserTransaction(userTransactionId, vaultAddress, timestamp, createdAtBlock, userAddress, transactionType, sharePriceBD, amount)
   }
 }
 
@@ -196,7 +204,7 @@ function createBalanceHistory(
   createdAtBlock: BigInt,
   userAddress: string,
   type: string,
-  sharePrice: BigDecimal,
+  sharePrice: BigInt,
   value: BigDecimal,
   additionalValues: BigDecimal[],
   poolBalance: BigDecimal,
@@ -209,6 +217,7 @@ function createBalanceHistory(
   userBalanceHistory.vault = vault.id
   userBalanceHistory.transactionType = type
   userBalanceHistory.sharePrice = sharePrice
+  userBalanceHistory.priceUnderlying = vault.priceUnderlying
   userBalanceHistory.value = value
   userBalanceHistory.poolBalance = poolBalance
   userBalanceHistory.vaultBalance = vaultBalance
@@ -235,4 +244,49 @@ function createUserTransaction(
   userTransaction.sharePrice = sharePrice
   userTransaction.value = value
   userTransaction.save()
+}
+
+
+function updateVaultUsers(vault: Vault, value: BigDecimal, userAddress: string): void {
+  let users = vault.users;
+  if (value.equals(BigDecimal.zero())) {
+    let newUsers: string[] = [];
+    for (let i = 0; i < users.length; i++) {
+      if (users[i].toLowerCase() != userAddress.toLowerCase()) {
+        newUsers.push(users[i])
+      }
+    }
+    users = newUsers;
+  } else {
+    let hasUser = false;
+    for (let i = 0; i < users.length; i++) {
+      if (userAddress.toLowerCase() == users[i].toLowerCase()) {
+        hasUser = true;
+        break;
+      }
+    }
+
+    if (!hasUser) {
+      users.push(userAddress)
+    }
+  }
+  vault.users = users;
+  vault.save()
+}
+
+export function addVaultUser(vault: Vault, userAddress: string): void {
+  let users = vault.users;
+  let hasUser = false;
+  for (let i = 0; i < users.length; i++) {
+    if (userAddress.toLowerCase() == users[i].toLowerCase()) {
+      hasUser = true;
+      break;
+    }
+  }
+
+  if (!hasUser) {
+    users.push(userAddress)
+  }
+  vault.users = users;
+  vault.save()
 }

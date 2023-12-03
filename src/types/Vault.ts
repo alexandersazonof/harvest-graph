@@ -43,6 +43,8 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
       vault.isIFarm = false
     }
     vault.tvl = BigDecimal.zero()
+    vault.users = [];
+    vault.lastUsersShareTimestamp = BigInt.zero();
     vault.save();
     pushVault(vault.id, block)
   }

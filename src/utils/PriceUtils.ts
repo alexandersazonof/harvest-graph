@@ -27,6 +27,7 @@ import { NotionalOracle } from "../../generated/templates/VaultListener/Notional
 import { isBalancer, isBalancerContract, isCurve, isLpUniPair, isNotional, isUniswapV3 } from "./PlatformUtils";
 import { ERC20 } from '../../generated/Storage/ERC20';
 import { createPriceFeed } from '../types/PriceFeed';
+import { fetchPricePerFullShare } from './VaultUtils';
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
@@ -49,7 +50,16 @@ export function getPriceForCoin(address: Address, block: number): BigInt {
 export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal {
   let tempPrice = BigDecimal.zero();
 
-  if (isPsAddress(vault.id)) {
+  if (vault.id == '0x1571ed0bed4d987fe2b498ddbae7dfa19519f651') {
+    const price = getPriceForCoin(getFarmToken(), block.number.toI32())
+    if (!price.isZero()) {
+      tempPrice = price.divDecimal(BD_18)
+      const tempSP = fetchPricePerFullShare(Address.fromString(vault.id)).divDecimal(BD_18);
+      tempPrice = tempPrice.times(tempSP);
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
+    }
+  } else if (isPsAddress(vault.id)) {
     const price = getPriceForCoin(getFarmToken(), block.number.toI32())
     if (!price.isZero()) {
       tempPrice = price.divDecimal(BD_18)

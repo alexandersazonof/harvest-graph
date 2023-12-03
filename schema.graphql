@@ -32,6 +32,18 @@ type Vault @entity {
   isIFarm: Boolean
   tvl: BigDecimal!
   skipFirstApyReward: Boolean
+  users: [String!]!
+  lastUsersShareTimestamp: BigInt!
+}
+
+type VaultHistory @entity {
+  "tx + vault address"
+  id: ID!
+  vault: Vault!
+
+  priceUnderlying: BigDecimal!
+  sharePrice: BigInt!
+  timestamp: BigInt!
 }
 
 type Strategy @entity {
@@ -203,7 +215,7 @@ type UserBalanceHistory @entity {
   vaultBalance: BigDecimal!
   poolBalance: BigDecimal!
   priceUnderlying: BigDecimal!
-  sharePrice: BigDecimal!
+  sharePrice: BigInt!
   timestamp: BigInt!
   createAtBlock: BigInt!
 }
@@ -296,4 +308,18 @@ type PriceFeed @entity {
   value: BigDecimal!
   timestamp: BigInt!
   createAtBlock: BigInt!
+}
+
+type HandlerCalculator @entity {
+  # address
+  id: ID!
+  count: BigInt!
+}
+
+type HandlerCalculatroHistory @entity {
+  # tx-address
+  id: ID!
+  handler: HandlerCalculator!
+  name: String!
+  timestamp: BigInt!
 }

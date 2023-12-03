@@ -50,12 +50,12 @@ export function saveApyReward(
         const index = tokenLength.minus(BigInt.fromI32(1))
         const rewardToken = fetchRewardToken(poolAddress, index)
         if (rewardToken == NULL_ADDRESS) {
-          log.log(log.Level.ERROR, `Can not create apy reward for uniswapV3 pool: ${poolAddress.toHex()}, because rewardToken is null. We tried get by index = ${index}`)
+          log.log(log.Level.WARNING, `Can not create apy reward for uniswapV3 pool: ${poolAddress.toHex()}, because rewardToken is null. We tried get by index = ${index}`)
           return;
         }
         const rewardRateForUniswapV3 = fetchRewardRateForToken(poolAddress, rewardToken)
         if (rewardRateForUniswapV3 == BigInt.zero()) {
-          log.log(log.Level.ERROR, `Can not create apy reward for uniswapV3 pool: ${poolAddress.toHex()}, because rewardRate is 0. We tried get by tokenAddress = ${rewardToken}`)
+          log.log(log.Level.WARNING, `Can not create apy reward for uniswapV3 pool: ${poolAddress.toHex()}, because rewardRate is 0. We tried get by tokenAddress = ${rewardToken}`)
           return;
         }
         // only for pfUniV3_CNG_WETH get price for CNG
@@ -103,7 +103,7 @@ export function saveApyReward(
 
       if (apy.apy.le(BigDecimal.zero()) || apy.apy.gt(BIG_APY_BD)) {
         // don't save 0 APY && more 1000
-        log.log(log.Level.ERROR, `Can not save APY < 0 OR APY > 5000 for pool ${poolAddress.toHex()}`)
+        log.log(log.Level.WARNING, `Can not save APY < 0 OR APY > 5000 for pool ${poolAddress.toHex()}`)
         return;
       }
       apy.vault = vault.id
@@ -137,7 +137,7 @@ export function calculateAndSaveApyAutoCompound(id: string, diffSharePrice: BigD
 
     if (apyAutoCompound.apy.le(BigDecimal.zero()) || apyAutoCompound.apy.gt(BIG_APY_BD)) {
       // don't save 0 APY && more 1000
-      log.log(log.Level.ERROR, `Can not save APY < 0 OR APY > 1000 for vault ${vault.id}`)
+      log.log(log.Level.WARNING, `Can not save APY < 0 OR APY > 1000 for vault ${vault.id}`)
       return BigDecimal.zero();
     }
 

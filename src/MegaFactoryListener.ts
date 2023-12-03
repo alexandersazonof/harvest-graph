@@ -3,9 +3,11 @@ import { loadOrCreateStrategy } from "./types/Strategy";
 import { loadOrCreateVault } from "./types/Vault";
 import { MEGA_FACTORY_ADDRESS } from "./utils/Constant";
 import { loadOrCreatePotPool } from "./types/PotPool";
+import { handlerLogic } from './debug/HandlerCalculator';
 
 
 export function handleDeploymentCompleted(event: DeploymentCompleted): void {
+  handlerLogic(event.address.toHexString(), 'DeploymentCompleted', event.transaction, event.block);
   const id = event.params.id
   const megaFactoryContract = MegaFactoryContract.bind(MEGA_FACTORY_ADDRESS)
   const tryCompletedDeployment = megaFactoryContract.try_completedDeployments(id)

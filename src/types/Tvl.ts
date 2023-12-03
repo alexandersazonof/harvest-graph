@@ -15,7 +15,7 @@ import {
   BD_ZERO,
   BI_18, canCalculateTotalTvl, CONST_ID,
   EXCLUSIVE_REWARD_POOL,
-  getFarmToken,
+  getFarmToken, I_FARM_TOKEN,
   isPsAddress, TOTAL_TVL_FROM, TVL_WARN, UNI_V3_WBTC_WETH,
 } from '../utils/Constant';
 import { fetchPricePerFullShare } from "../utils/VaultUtils";
@@ -40,7 +40,11 @@ export function createTvl(address: Address, block: ethereum.Block, transaction: 
       let sharePrice = BI_18
       tvl.sequenceId = tvlSequenceId(vault.id).lastSequenceId
 
-      if (isPsAddress(vault.id)) {
+      if (vault.id == '0x1571ed0bed4d987fe2b498ddbae7dfa19519f651') {
+        const tempSP = fetchPricePerFullShare(vaultAddress).divDecimal(BD_18);
+        totalSupply = fetchContractTotalSupply(I_FARM_TOKEN)
+        price = getPriceForCoin(getFarmToken(), block.number.toI32()).divDecimal(BD_18).times(tempSP);
+      } else if (isPsAddress(vault.id)) {
         totalSupply = fetchContractTotalSupply(EXCLUSIVE_REWARD_POOL)
         price = getPriceForCoin(getFarmToken(), block.number.toI32()).divDecimal(BD_18)
       } else {
