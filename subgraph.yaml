@@ -1,4 +1,4 @@
-specVersion: 0.0.4
+specVersion: 0.0.8
 schema:
   file: ./schema.graphql
 dataSources:
@@ -48,6 +48,11 @@ dataSources:
       callHandlers:
         - function: setController(address)
           handler: handleSetController
+      blockHandlers:
+        - handler: handleBlock
+          filter:
+            kind: polling
+            every: 7200
       file: ./src/StorageListener.ts
     network: mainnet
   - kind: ethereum

@@ -1,5 +1,5 @@
 import { Address, BigDecimal, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
-import { Vault } from "../../generated/schema";
+import { Vault, VaultUtil } from '../../generated/schema';
 import { fetchContractDecimal, fetchContractName, fetchContractSymbol } from "../utils/ERC20Utils";
 import { loadOrCreateERC20Token } from "./Token";
 import { IFarmVaultListener, UniswapV3VaultListener, VaultListener } from "../../generated/templates";
@@ -47,7 +47,25 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     vault.lastUsersShareTimestamp = BigInt.zero();
     vault.save();
     pushVault(vault.id, block)
+    const vaultUtils= getVaultUtils();
+    const vaults = vaultUtils.vaults
+    vaults.push(vault.id)
+    vaultUtils.vaults = vaults;
+    vaultUtils.vaultLength = vaults.length
+    vaultUtils.save();
   }
-
   return vault;
+}
+
+export function getVaultUtils(): VaultUtil {
+  const id = '1';
+  let vaultUtils = VaultUtil.load(id)
+  if (!vaultUtils) {
+    vaultUtils = new VaultUtil(id);
+    vaultUtils.vaults = [];
+    vaultUtils.vaultLength = 0;
+    vaultUtils.lastBlockPrice = BigInt.zero();
+    vaultUtils.save()
+  }
+  return vaultUtils;
 }

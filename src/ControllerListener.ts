@@ -60,6 +60,7 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
       vaultHistory = new VaultHistory(vaultHistoryId);
       vaultHistory.vault = vault.id;
       vaultHistory.sharePrice = vault.lastSharePrice;
+      vaultHistory.sharePriceDec = vault.lastSharePrice.divDecimal(pow(BD_TEN, vault.decimal.toI32()))
       vaultHistory.priceUnderlying = vault.priceUnderlying;
       vaultHistory.timestamp = event.block.timestamp;
       vaultHistory.save();

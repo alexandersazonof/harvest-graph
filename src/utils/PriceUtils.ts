@@ -8,7 +8,7 @@ import {
   DEFAULT_DECIMAL,
   DEFAULT_PRICE, ETH_BALANCER_POOL,
   getFarmToken,
-  getOracleAddress, isEth, isPsAddress, isStableCoin, LV_USD_3_CRV,
+  getOracleAddress, I_FARM_TOKEN, isEth, isPsAddress, isStableCoin, LV_USD_3_CRV,
   NOTIONAL_ORACLE_ADDRESS,
   NULL_ADDRESS, PETH_CRV, UNI_V3_WBTC_WETH, UNISWAP_V3_STETH_WETH, USD_BALANCER_POOL, WETH,
 } from './Constant';
@@ -50,13 +50,14 @@ export function getPriceForCoin(address: Address, block: number): BigInt {
 export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal {
   let tempPrice = BigDecimal.zero();
 
-  if (vault.id == '0x1571ed0bed4d987fe2b498ddbae7dfa19519f651') {
+  if (vault.id == I_FARM_TOKEN.toHexString()) {
     const price = getPriceForCoin(getFarmToken(), block.number.toI32())
     if (!price.isZero()) {
       tempPrice = price.divDecimal(BD_18)
-      const tempSP = fetchPricePerFullShare(Address.fromString(vault.id)).divDecimal(BD_18);
-      tempPrice = tempPrice.times(tempSP);
-      createPriceFeed(vault, tempPrice, block);
+      // const tempSP = fetchPricePerFullShare(Address.fromString(vault.id)).divDecimal(BD_18);
+      // tempPrice = tempPrice.times(tempSP);
+      // createPriceFeed(vault, tempPrice, block);
+      // return tempPrice;
       return tempPrice;
     }
   } else if (isPsAddress(vault.id)) {
