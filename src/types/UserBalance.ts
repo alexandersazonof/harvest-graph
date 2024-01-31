@@ -1,8 +1,18 @@
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { AutoStake, UserBalance, UserBalanceHistory, UserTransaction, Vault } from "../../generated/schema";
 import { VaultContract } from "../../generated/templates/VaultListener/VaultContract";
-import { pow } from "../utils/MathUtils";
-import { BD_18, BD_ONE, BD_TEN, BD_ZERO, BI_18, FARM_TOKEN_MAINNET, FARM_TOKEN_MATIC, I_FARM_TOKEN } from "../utils/Constant";
+import { pow, powBI } from '../utils/MathUtils';
+import {
+  BD_18,
+  BD_ONE,
+  BD_TEN,
+  BD_ZERO,
+  BI_18,
+  BI_TEN,
+  FARM_TOKEN_MAINNET,
+  FARM_TOKEN_MATIC,
+  I_FARM_TOKEN,
+} from '../utils/Constant';
 import { isIFarm } from "../utils/PlatformUtils";
 import { getTransactionType, UNKNOWN_TRANSACTION_TYPE } from "../utils/UserBalanceUtils";
 import { ERC20 } from '../../generated/Storage/ERC20';
@@ -15,7 +25,7 @@ export function createUserBalance(vaultAddress: Address, amount: BigInt, benefic
     const vaultContract = VaultContract.bind(vaultAddress)
     const tryPricePerFullShare = vaultContract.try_getPricePerFullShare()
     let sharePriceBD = BD_ONE
-    let sharePrice = BI_18
+    let sharePrice = powBI(BI_TEN, vault.decimal.toI32())
     if (!tryPricePerFullShare.reverted) {
       sharePrice = tryPricePerFullShare.value
       sharePriceBD = sharePrice.divDecimal(pow(BD_TEN, vault.decimal.toI32()))
@@ -90,7 +100,7 @@ export function createIFarmUserBalance(vaultAddress: Address, beneficary: Addres
     // TODO call
     const tryPricePerFullShare = vaultContract.try_getPricePerFullShare()
     let sharePriceBD = BD_ONE
-    let sharePrice = BI_18
+    let sharePrice = powBI(BI_TEN, vault.decimal.toI32())
     if (!tryPricePerFullShare.reverted) {
       sharePrice = tryPricePerFullShare.value
       sharePriceBD = sharePrice.divDecimal(pow(BD_TEN, vault.decimal.toI32()))
@@ -114,9 +124,11 @@ export function createIFarmUserBalance(vaultAddress: Address, beneficary: Addres
     }
 
     userBalance.additionalValues = [vaultBalance, userBalance.additionalValues[1]]
-    userBalance.value = vaultBalance.plus(
-      userBalance.additionalValues[1]
-    )
+    // OLD LOGIC
+    // userBalance.value = vaultBalance.plus(
+    //   userBalance.additionalValues[1]
+    // )
+    userBalance.value = vaultBalance;
 
     userBalance.save()
 
@@ -155,7 +167,7 @@ export function createUserBalanceForFarm(amount: BigInt, beneficary: Address, tx
     // TODO call
     const trySharePrice = vaultContract.try_getPricePerFullShare()
     const sharePrice = trySharePrice.reverted
-      ? BI_18
+      ? powBI(BI_TEN, vault.decimal.toI32())
       : trySharePrice.value
     const sharePriceBD = sharePrice.toBigDecimal()
     const autoStakeContract = AutoStakeContract.bind(autoStake);
@@ -181,7 +193,8 @@ export function createUserBalanceForFarm(amount: BigInt, beneficary: Address, tx
     }
 
     userBalance.additionalValues = [userBalance.additionalValues[0], value]
-    userBalance.value = value.plus(userBalance.additionalValues[0])
+    // userBalance.value = value.plus(userBalance.additionalValues[0])
+    userBalance.value = value;
     userBalance.save()
 
     const userBalanceHistoryId = `${tx.hash.toHex()}-${beneficary.toHex()}`

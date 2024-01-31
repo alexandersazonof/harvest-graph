@@ -264,7 +264,11 @@ export function getPriceForCurve(underlyingAddress: string, block: number): BigD
 
     value = value.plus(tokenPrice.times(tempBalance))
   }
-  return value.times(BD_18).div(curveContract.totalSupply().toBigDecimal())
+  const totalSupply = curveContract.totalSupply().toBigDecimal();
+  if (totalSupply.gt(BigDecimal.zero())) {
+    return value.times(BD_18).div(totalSupply);
+  }
+  return BigDecimal.zero();
 }
 
 // amount / (10 ^ 18 / 10 ^ decimal)
