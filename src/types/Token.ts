@@ -10,7 +10,8 @@ export function loadOrCreateERC20Token(tokenAddress: Address): Token{
     token = new Token(tokenAddress.toHex())
     token.name = tokenContract.try_name().reverted ? UNKNOWN : tokenContract.name();
     token.symbol = tokenContract.try_symbol().reverted ? UNKNOWN : tokenContract.symbol()
-    token.decimals = tokenContract.try_decimals().reverted ? DEFAULT_DECIMAL :tokenContract.decimals()
+    // token.decimals = tokenContract.try_decimals().reverted ? DEFAULT_DECIMAL : tokenContract.decimals()
+    token.decimals = DEFAULT_DECIMAL;
     token.save()
   }
   return token as Token

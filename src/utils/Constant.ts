@@ -110,6 +110,14 @@ export const SKIP_TOTAL_TVL = [
   "0xd7b17297b9884aa73bf5e6e39e3cec107ffe6b17",
   "0x12db4a4c442944a10ed153db64c500beb006039f",
   "0x29ec64560ab14d3166222bf07c3f29c4916e0027",
+  // fUniV3_USDC_WETH
+  "0x0b4c4ea418cd596b1204c0dd07e419707149c7c6",
+  // fUniV3_WETH_USDT
+  '0x5c49e0386215077d1a3ecc425cc30ce34ec08b60',
+  // FARM_crvRenWBTC
+  '0x9aa8f427a17d6b0d91b6262989edc7d45d6aedf8',
+  // fUniV3_DAI_WETH
+  '0x970cc1e0bdb3b29a6a12bde1954a8509acbc9158',
 ]
 
 export const LP_UNI_PAIR_CONTRACT_NAME = [
