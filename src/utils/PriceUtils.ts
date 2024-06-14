@@ -2,15 +2,29 @@ import { Address, BigDecimal, BigInt, ethereum, log } from '@graphprotocol/graph
 import { OracleContract } from "../../generated/templates/VaultListener/OracleContract";
 import {
   BD_18,
-  BD_ONE, BD_ONE_TRILLION,
+  BD_ONE,
+  BD_ONE_TRILLION,
   BD_TEN,
   BI_18,
   DEFAULT_DECIMAL,
-  DEFAULT_PRICE, ETH_BALANCER_POOL,
+  DEFAULT_PRICE,
+  ETH_BALANCER_POOL,
   getFarmToken,
-  getOracleAddress, I_FARM_TOKEN, isEth, isPsAddress, isStableCoin, LV_USD_3_CRV,
+  getOracleAddress,
+  I_FARM_TOKEN,
+  isEth,
+  isPsAddress,
+  isStableCoin,
+  LV_USD_3_CRV,
   NOTIONAL_ORACLE_ADDRESS,
-  NULL_ADDRESS, PETH_CRV, UNI_V3_WBTC_WETH, UNISWAP_V3_STETH_WETH, USD_BALANCER_POOL, WETH,
+  NULL_ADDRESS,
+  PETH_CRV,
+  UNI_V3_WBTC_WETH,
+  UNISWAP_V3_CNG_ETH,
+  UNISWAP_V3_DAI_USDC,
+  UNISWAP_V3_STETH_WETH,
+  USD_BALANCER_POOL,
+  WETH,
 } from './Constant';
 import { Token, Vault } from "../../generated/schema";
 import { UniswapV2PairContract } from "../../generated/ExclusiveRewardPoolListener/UniswapV2PairContract";
@@ -200,6 +214,12 @@ export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
 
     if (price.gt(BD_ONE_TRILLION) && vault.id.toLowerCase() == UNI_V3_WBTC_WETH) {
       return price.div(pow(BD_TEN, 3))
+    }
+    if (vault.id == UNISWAP_V3_CNG_ETH) {
+      return price.div(BigDecimal.fromString('2'));
+    }
+    if (vault.id == UNISWAP_V3_DAI_USDC) {
+      return price.div(BigDecimal.fromString('80'));
     }
     if (vault.id.toLowerCase() == UNISWAP_V3_STETH_WETH) {
       return price.times(BigDecimal.fromString('2'));

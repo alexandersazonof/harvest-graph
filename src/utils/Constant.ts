@@ -134,6 +134,8 @@ export const CURVE_CONTRACT_NAME = 'Curve'.toLowerCase()
 export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
 export const NOTIONAL_CONTRACT_NAME = 'nToken'.toLowerCase()
 export const I_FARM_NAME = 'iFARM'.toLowerCase()
+export const UNISWAP_V3_CNG_ETH = '0xc3426599Ec933FbF657ee44b53e7f01d83Be1f63'.toLowerCase();
+export const UNISWAP_V3_DAI_USDC = '0xFb387177fF9Db15294F7Aebb1ea1e941f55695bc'.toLowerCase();
 export const UNISWAP_V3_STETH_WETH = '0x65383Abd40f9f831018dF243287F7AE3612c62AC'.toLowerCase();
 export const UNISWAP_V3_FEES = [
   '3000',
@@ -178,7 +180,8 @@ export const WETH = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756c
 export const ETH_LIST = [
   PETH_CRV,
   ETH_BALANCER_POOL,
-  OETH_ETH
+  OETH_ETH,
+  '0x06325440d014e39736583c165c2963ba99faf14e'.toLowerCase(),
 ]
 
 export function isEth(address: string): boolean {

@@ -14,6 +14,8 @@ type Vault @entity {
   symbol: String!
   decimal: BigInt!
   createAtBlock: BigInt!
+  tvlSequenceId: Int!
+  priceFeedSequenceId: Int!
   timestamp: BigInt!
   strategy: Strategy
   pool: Pool
@@ -88,6 +90,7 @@ type Tvl @entity {
   id: ID!
   vault: Vault
   totalSupply: BigInt!
+  tvlSequenceId: Int!
   value: BigDecimal!
   priceUnderlying: BigDecimal!
   sequenceId: BigInt!
@@ -322,6 +325,7 @@ type PriceFeed @entity {
   vault: Vault!
   price: BigDecimal!
   sharePrice: BigDecimal!
+  priceFeedSequenceId: Int!
   # price * sharePrice
   value: BigDecimal!
   timestamp: BigInt!

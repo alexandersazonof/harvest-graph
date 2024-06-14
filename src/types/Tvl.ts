@@ -40,6 +40,7 @@ export function createTvl(address: Address, block: ethereum.Block, transaction: 
       let priceForVault = BigDecimal.zero()
       let sharePrice = BI_18
       tvl.sequenceId = tvlSequenceId(vault.id).lastSequenceId
+      tvl.tvlSequenceId = vault.tvlSequenceId
 
       if (vault.id == I_FARM_TOKEN.toHexString()) {
         const tempSP = fetchPricePerFullShare(vaultAddress).divDecimal(BD_18);
@@ -80,6 +81,7 @@ export function createTvl(address: Address, block: ethereum.Block, transaction: 
       if (canCalculateTotalTvl(vault.id)) {
         createTotalTvl(vault.tvl, tvl.value, id, block, vault.id)
       }
+      vault.tvlSequenceId = vault.tvlSequenceId + 1;
       vault.tvl = tvl.value
       vault.priceUnderlying = priceForVault
       vault.save()
@@ -113,6 +115,7 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, transa
       tvl.priceUnderlying = price
       tvl.value = value
       tvl.sequenceId = tvlSequenceId(vault.id).lastSequenceId
+      tvl.tvlSequenceId = vault.tvlSequenceId
 
       totalTvlCount(vault.id);
       if (tvl.value.ge(TVL_WARN)) {
@@ -124,6 +127,7 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, transa
       if (canCalculateTotalTvl(vault.id)) {
         createTotalTvl(vault.tvl, tvl.value, id, block, vault.id)
       }
+      vault.tvlSequenceId = vault.tvlSequenceId + 1;
       vault.tvl = tvl.value
       vault.priceUnderlying = price
       vault.save()
