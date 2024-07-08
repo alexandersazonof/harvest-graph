@@ -5,3 +5,4 @@
 /tests/.bin/
 /.DS_Store
 /tests/.DS_Store
+.env

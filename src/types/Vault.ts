@@ -6,6 +6,7 @@ import { IFarmVaultListener, UniswapV3VaultListener, VaultListener } from "../..
 import { fetchUnderlyingAddress } from "../utils/VaultUtils";
 import { isIFarm, isUniswapV3 } from "../utils/PlatformUtils";
 import { pushVault } from './TotalTvlUtils';
+import { BI_18 } from '../utils/Constant';
 
 export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, strategy: string = 'unknown'): Vault {
   let vault = Vault.load(vaultAddress.toHex())
@@ -21,7 +22,7 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     vault.timestamp = block.timestamp;
     vault.underlying = loadOrCreateERC20Token(underlying).id
     vault.lastShareTimestamp = BigInt.zero()
-    vault.lastSharePrice = BigInt.zero()
+    vault.lastSharePrice = BI_18
     vault.apyAutoCompound = BigDecimal.zero()
     vault.apyAutoCompoundCount = BigInt.zero()
     vault.apyReward = BigDecimal.zero()

@@ -37,18 +37,7 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
         const diffSharePrice = sharePrice.newSharePrice.minus(sharePrice.oldSharePrice).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
         const diffTimestamp = timestamp.minus(lastShareTimestamp)
         const apy = calculateAndSaveApyAutoCompound(`${event.transaction.hash.toHex()}-${vaultAddress}`, diffSharePrice, diffTimestamp, vault, event.block)
-
       }
-
-      // TODO enable after fix
-      // if (vault.lastUsersShareTimestamp.plus(TWO_WEEKS_IN_SECONDS).lt(event.block.timestamp)) {
-      //   const users = vault.users
-      //   for (let i = 0; i < users.length; i++) {
-      //     createUserBalance(event.params.vault, BigInt.zero(), Address.fromString(users[i]), event.transaction, event.block, false);
-      //   }
-      //   vault.lastUsersShareTimestamp = event.block.timestamp
-      // }
-
       vault.lastShareTimestamp = sharePrice.timestamp
       vault.lastSharePrice = sharePrice.newSharePrice
       vault.save()
