@@ -6,15 +6,17 @@ import { IFarmVaultListener, UniswapV3VaultListener, VaultListener } from "../..
 import { fetchUnderlyingAddress } from "../utils/VaultUtils";
 import { isIFarm, isUniswapV3 } from "../utils/PlatformUtils";
 import { pushVault } from './TotalTvlUtils';
-import { BI_18 } from '../utils/Constant';
+import { BI_18, BI_TEN } from '../utils/Constant';
+import { powBI } from '../utils/MathUtils';
 
 export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, strategy: string = 'unknown'): Vault {
   let vault = Vault.load(vaultAddress.toHex())
   if (vault == null) {
     log.log(log.Level.INFO, `Create new vault: ${vaultAddress}`)
     vault = new Vault(vaultAddress.toHex());
+    const decimal = fetchContractDecimal(vaultAddress);
     vault.name = fetchContractName(vaultAddress)
-    vault.decimal = fetchContractDecimal(vaultAddress)
+    vault.decimal = decimal;
     vault.symbol = fetchContractSymbol(vaultAddress)
     const underlying = fetchUnderlyingAddress(vaultAddress)
     vault.createAtBlock = block.number;
@@ -22,7 +24,7 @@ export function loadOrCreateVault(vaultAddress: Address, block: ethereum.Block, 
     vault.timestamp = block.timestamp;
     vault.underlying = loadOrCreateERC20Token(underlying).id
     vault.lastShareTimestamp = BigInt.zero()
-    vault.lastSharePrice = BI_18
+    vault.lastSharePrice = powBI(BI_TEN, decimal.toI32());
     vault.apyAutoCompound = BigDecimal.zero()
     vault.apyAutoCompoundCount = BigInt.zero()
     vault.apyReward = BigDecimal.zero()
