@@ -1,6 +1,5 @@
 import { createTvl } from "./types/Tvl";
 import { Staked, Withdrawn } from "../generated/ExclusiveRewardPoolListener/ExclusiveRewardPoolContract";
-import { createUserBalanceForFarm } from "./types/UserBalance";
 import { handlerLogic } from './debug/HandlerCalculator';
 
 export function handleStaked(event: Staked): void {
