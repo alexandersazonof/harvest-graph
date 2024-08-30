@@ -42,7 +42,9 @@ export const STABLE_COIN_ARRAY_MAINNET = [
   '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase(),
   '0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f'.toLowerCase(),
   '0x2F7350Cb5e434C2d177922110c7e314953B84Afc'.toLowerCase(),
-  '0x91553BAD9Fbc8bD69Ff5d5678Cbf7D514d00De0b'.toLowerCase()
+  '0x91553BAD9Fbc8bD69Ff5d5678Cbf7D514d00De0b'.toLowerCase(),
+  '0x2920f9fc667e780c0cb5a78a104d21413377f97e'.toLowerCase(),
+  '0x0da210f60a179ee3364123943930dadbab8b210e'.toLowerCase()
 ]
 
 export const STABLE_COIN_ARRAY_MATIC = [
@@ -184,6 +186,7 @@ export const ETH_LIST = [
   ETH_BALANCER_POOL,
   OETH_ETH,
   '0x06325440d014e39736583c165c2963ba99faf14e'.toLowerCase(),
+  '0x3410463726a7a22ce0809367a4418fe82fc31fd3'.toLowerCase()
 ]
 
 export function isEth(address: string): boolean {
