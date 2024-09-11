@@ -44,7 +44,8 @@ export const STABLE_COIN_ARRAY_MAINNET = [
   '0x2F7350Cb5e434C2d177922110c7e314953B84Afc'.toLowerCase(),
   '0x91553BAD9Fbc8bD69Ff5d5678Cbf7D514d00De0b'.toLowerCase(),
   '0x2920f9fc667e780c0cb5a78a104d21413377f97e'.toLowerCase(),
-  '0x0da210f60a179ee3364123943930dadbab8b210e'.toLowerCase()
+  '0x0da210f60a179ee3364123943930dadbab8b210e'.toLowerCase(),
+  '0xc2b021133d1b0cf07dba696fd5dd89338428225b'.toLowerCase()
 ]
 
 export const STABLE_COIN_ARRAY_MATIC = [

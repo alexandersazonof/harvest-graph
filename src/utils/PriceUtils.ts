@@ -121,6 +121,11 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
 
   const underlying = Token.load(underlyingAddress)
   if (underlying != null) {
+    if (isEth(underlying.id.toLowerCase())) {
+      tempPrice = getPriceForCoin(WETH, block.number.toI32()).divDecimal(BD_18);
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
+    }
     if (isLpUniPair(underlying.name)) {
       const tempInPrice = getPriceForCoin(Address.fromString(underlyingAddress), block.number.toI32())
       if (tempInPrice.gt(DEFAULT_PRICE)) {
