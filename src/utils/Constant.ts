@@ -135,6 +135,7 @@ export const LP_UNI_PAIR_CONTRACT_NAME = [
   'Verse Exchange'.toLowerCase(),
 ]
 export const BALANCER_CONTRACT_NAME = 'Balancer'.toLowerCase()
+export const PENDLE_CONTRACT_NAME = 'Pendle'.toLowerCase()
 export const CURVE_CONTRACT_NAME = 'Curve'.toLowerCase()
 export const F_UNI_V3_CONTRACT_NAME = 'fUniV3'.toLowerCase()
 export const NOTIONAL_CONTRACT_NAME = 'nToken'.toLowerCase()

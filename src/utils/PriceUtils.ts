@@ -38,10 +38,19 @@ import { fetchContractDecimal } from "./ERC20Utils";
 import { pow, powBI } from "./MathUtils";
 import { NotionalToken } from "../../generated/templates/VaultListener/NotionalToken";
 import { NotionalOracle } from "../../generated/templates/VaultListener/NotionalOracle";
-import { isBalancer, isBalancerContract, isCurve, isLpUniPair, isNotional, isUniswapV3 } from "./PlatformUtils";
+import {
+  isBalancer,
+  isBalancerContract,
+  isCurve,
+  isLpUniPair,
+  isNotional,
+  isPendle,
+  isUniswapV3,
+} from './PlatformUtils';
 import { ERC20 } from '../../generated/Storage/ERC20';
 import { createPriceFeed } from '../types/PriceFeed';
 import { fetchPricePerFullShare } from './VaultUtils';
+import { PendlePoolContract } from '../../generated/Storage/PendlePoolContract';
 
 
 export function getPriceForCoin(address: Address, block: number): BigInt {
@@ -162,9 +171,40 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
       createPriceFeed(vault, tempPrice, block);
       return tempPrice;
     }
+    if (isPendle(underlying.name)) {
+      tempPrice = getPriceForBalancer(underlying.id, block.number.toI32())
+      createPriceFeed(vault, tempPrice, block);
+      return tempPrice;
+    }
   }
 
   return BigDecimal.zero()
+}
+
+function getPriceForPendle(underlying: Token, block: number): BigDecimal {
+  const pendleAddress = Address.fromString(underlying.id);
+  const pendleContract = PendlePoolContract.bind(pendleAddress);
+  const tryReadTokens = pendleContract.try_readTokens();
+  if (tryReadTokens.reverted) {
+    return BigDecimal.zero()
+  }
+  const tryReadState = pendleContract.try_readState(pendleAddress);
+  if (tryReadState.reverted) {
+    return BigDecimal.zero()
+  }
+  const state = tryReadState.value;
+  const totalPt = state.totalPt.toBigDecimal();
+  const totalSy = state.totalSy.toBigDecimal();
+  const tokens = tryReadTokens.value;
+  const pricePt = getPriceForCoin(tokens.get_PT(), block);
+  const priceSy = getPriceForCoin(tokens.get_SY(), block);
+
+  if (pricePt.isZero() || priceSy.isZero()) {
+    log.log(log.Level.WARNING, `Price for Pendle tokens is zero`);
+    return BigDecimal.zero();
+  }
+
+  return (pricePt.divDecimal(BD_18).times(totalPt)).plus(priceSy.divDecimal(BD_18).times(totalSy));
 }
 
 function getPriceForNotional(underlying: Token, block: number): BigDecimal {

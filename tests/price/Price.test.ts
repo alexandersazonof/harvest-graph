@@ -355,4 +355,44 @@ describe('Get price for uniswapV3', () => {
     log.log(log.Level.INFO, `price = ${price}`)
     assert.assertTrue(price.equals(BigDecimal.fromString('3.171155196301447938887288055602062')))
   })
+
+  // Mock helper function to simulate contract responses
+  function mockPendlePoolReadTokens(pendlePoolAddress: Address, ptAddress: string, syAddress: string): void {
+    createMockedFunction(pendlePoolAddress, "readTokens", "readTokens():(address,address,address)")
+      .returns([Address.fromString(syAddress), Address.fromString(ptAddress), Address.fromString(ptAddress)]);
+  }
+
+  function mockPendlePoolReadState(pendlePoolAddress: Address, totalPt: string, totalSy: string): void {
+    createMockedFunction(pendlePoolAddress, "readState", "readState(address):(int256,int256,int256,address,int256,uint256,uint256,uint256,uint256)")
+      .withArgs([pendlePoolAddress])
+      .returns([BigInt.fromString(totalPt), BigInt.fromString(totalSy), BigInt.zero(), Address.zero(), BigInt.zero(), BigInt.zero(), BigInt.zero(), BigInt.zero(), BigInt.zero()]);
+  }
+
+  function mockGetPriceForCoin(tokenAddress: Address, blockNumber: i32, price: BigInt): void {
+    createMockedFunction(tokenAddress, "getPrice", "getPrice(address):(uint256)")
+      .withArgs([tokenAddress])
+      .returns([price]);
+  }
+
+  test("Test getPriceForPendle with valid data", () => {
+    const block = new ethereum.Block(newMockEvent().block);
+
+    const pendlePoolAddress = Address.fromString("0x1234567890abcdef1234567890abcdef12345678");
+    const ptAddress = "0x1111111111111111111111111111111111111111";
+    const syAddress = "0x2222222222222222222222222222222222222222";
+
+    // Mocking contract calls
+    mockPendlePoolReadTokens(pendlePoolAddress, ptAddress, syAddress);
+    mockPendlePoolReadState(pendlePoolAddress, "1000000000000000000", "2000000000000000000"); // Mock 1 PT, 2 SY
+    mockGetPriceForCoin(Address.fromString(ptAddress), block.number.toI32(), BigInt.fromString("1000000000000000000")); // 1.0 PT price
+    mockGetPriceForCoin(Address.fromString(syAddress), block.number.toI32(), BigInt.fromString("500000000000000000")); // 0.5 SY price
+
+    // Calling the function
+    const price = getPriceForPendle(pendlePoolAddress, block.number.toI32());
+
+    // Expected price: (1 * 1.0) + (2 * 0.5) = 2.0
+    assert.bigDecimalEquals(price, BigDecimal.fromString("2.0"));
+
+    clearStore();
+  });
 })

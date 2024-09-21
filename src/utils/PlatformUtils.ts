@@ -2,7 +2,7 @@ import {
   BALANCER_CONTRACT_NAME,
   CURVE_CONTRACT_NAME,
   F_UNI_V3_CONTRACT_NAME, FARM_CONTRACTS, I_FARM_NAME,
-  LP_UNI_PAIR_CONTRACT_NAME, NOTIONAL_CONTRACT_NAME,
+  LP_UNI_PAIR_CONTRACT_NAME, NOTIONAL_CONTRACT_NAME, PENDLE_CONTRACT_NAME,
 } from './Constant';
 import { Address } from "@graphprotocol/graph-ts";
 import { WeightedPool2TokensContract } from "../../generated/templates/VaultListener/WeightedPool2TokensContract";
@@ -18,6 +18,10 @@ export function isLpUniPair(name: string): boolean {
 
 export function isBalancer(name: string): boolean {
   return !!name.toLowerCase().startsWith(BALANCER_CONTRACT_NAME);
+}
+
+export function isPendle(name: string): boolean {
+  return !!name.toLowerCase().startsWith(PENDLE_CONTRACT_NAME);
 }
 
 export function isBalancerContract(address: Address): boolean {
