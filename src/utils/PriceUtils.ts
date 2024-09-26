@@ -171,8 +171,9 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
       createPriceFeed(vault, tempPrice, block);
       return tempPrice;
     }
+
     if (isPendle(underlying.name)) {
-      tempPrice = getPriceForBalancer(underlying.id, block.number.toI32())
+      tempPrice = getPriceForPendle(underlying, block.number.toI32())
       createPriceFeed(vault, tempPrice, block);
       return tempPrice;
     }
