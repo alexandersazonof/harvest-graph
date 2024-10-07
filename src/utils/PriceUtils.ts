@@ -185,27 +185,46 @@ export function getPriceByVault(vault: Vault, block: ethereum.Block): BigDecimal
 function getPriceForPendle(underlying: Token, block: number): BigDecimal {
   const pendleAddress = Address.fromString(underlying.id);
   const pendleContract = PendlePoolContract.bind(pendleAddress);
+
   const tryReadTokens = pendleContract.try_readTokens();
   if (tryReadTokens.reverted) {
-    return BigDecimal.zero()
+    log.log(log.Level.WARNING, `Failed to read tokens from Pendle pool at ${pendleAddress.toHexString()}`);
+    return BigDecimal.zero();
   }
+
   const tryReadState = pendleContract.try_readState(pendleAddress);
   if (tryReadState.reverted) {
-    return BigDecimal.zero()
+    log.log(log.Level.WARNING, `Failed to read state from Pendle pool at ${pendleAddress.toHexString()}`);
+    return BigDecimal.zero();
   }
+
   const state = tryReadState.value;
   const totalPt = state.totalPt.toBigDecimal();
   const totalSy = state.totalSy.toBigDecimal();
+
+  if (totalPt.equals(BigDecimal.zero()) || totalSy.equals(BigDecimal.zero())) {
+    log.log(log.Level.WARNING, `Total PT or SY in Pendle pool is zero at ${pendleAddress.toHexString()}`);
+    return BigDecimal.zero();
+  }
+
   const tokens = tryReadTokens.value;
   const pricePt = getPriceForCoin(tokens.get_PT(), block);
   const priceSy = getPriceForCoin(tokens.get_SY(), block);
 
+  if (pricePt.isZero()) {
+    log.log(log.Level.WARNING, `Price for PT token is zero`);
+  }
+  if (priceSy.isZero()) {
+    log.log(log.Level.WARNING, `Price for SY token is zero`);
+  }
   if (pricePt.isZero() || priceSy.isZero()) {
-    log.log(log.Level.WARNING, `Price for Pendle tokens is zero`);
     return BigDecimal.zero();
   }
 
-  return (pricePt.divDecimal(BD_18).times(totalPt)).plus(priceSy.divDecimal(BD_18).times(totalSy));
+  return pricePt
+    .divDecimal(BD_18)
+    .times(totalPt)
+    .plus(priceSy.divDecimal(BD_18).times(totalSy));
 }
 
 function getPriceForNotional(underlying: Token, block: number): BigDecimal {
@@ -229,51 +248,70 @@ function getPriceForNotional(underlying: Token, block: number): BigDecimal {
 
 // ((token0Balance * token0Price) + (token1Balance * token1Price)) / (liquidity / 10 ** 18)
 export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
-  const poolAddress = getUniswapPoolV3ByVault(vault)
+  const poolAddress = getUniswapPoolV3ByVault(vault);
   if (!poolAddress.equals(NULL_ADDRESS)) {
-    const pool =  UniswapV3PoolContract.bind(poolAddress)
+    const pool = UniswapV3PoolContract.bind(poolAddress);
 
-    const liquidity = pool.liquidity()
-    const token0 = ERC20.bind(pool.token0())
-    const token1 = ERC20.bind(pool.token1())
-    const balanceToken0 = token0.balanceOf(poolAddress)
-    const balanceToken1 = token1.balanceOf(poolAddress)
-    const priceToken0 = getPriceForCoin(token0._address, block)
-    const priceToken1 = getPriceForCoin(token1._address, block)
-    if (priceToken0.isZero()
-      || liquidity.isZero()
-      || token0.decimals() == 0
-      || token1.decimals() == 0
-      || priceToken1.isZero()
-      || balanceToken1.isZero()
-      || balanceToken0.isZero()) {
-      return BigDecimal.zero()
-    }
-    const balance = priceToken0.divDecimal(BD_18)
-      .times(balanceToken0.divDecimal(pow(BD_TEN, token0.decimals())))
-      .plus(
-        priceToken1.divDecimal(BD_18)
-          .times(balanceToken1.divDecimal(pow(BD_TEN, token1.decimals()))))
+    try {
+      const liquidity = pool.liquidity();
+      const token0 = ERC20.bind(pool.token0());
+      const token1 = ERC20.bind(pool.token1());
+      const balanceToken0 = token0.balanceOf(poolAddress);
+      const balanceToken1 = token1.balanceOf(poolAddress);
+      const priceToken0 = getPriceForCoin(token0._address, block);
+      const priceToken1 = getPriceForCoin(token1._address, block);
 
-    let price = balance
-      .div(liquidity.divDecimal(BD_18))
+      const token0Decimals = token0.decimals();
+      const token1Decimals = token1.decimals();
 
-    if (price.gt(BD_ONE_TRILLION) && vault.id.toLowerCase() == UNI_V3_WBTC_WETH) {
-      return price.div(pow(BD_TEN, 3))
+      if (
+        priceToken0.isZero() ||
+        liquidity.isZero() ||
+        token0Decimals == 0 ||
+        token1Decimals == 0 ||
+        priceToken1.isZero() ||
+        balanceToken1.isZero() ||
+        balanceToken0.isZero()
+      ) {
+        return BigDecimal.zero();
+      }
+
+      const balance = priceToken0
+        .divDecimal(BD_18)
+        .times(balanceToken0.divDecimal(pow(BD_TEN, token0Decimals)))
+        .plus(
+          priceToken1
+            .divDecimal(BD_18)
+            .times(balanceToken1.divDecimal(pow(BD_TEN, token1Decimals)))
+        );
+
+      let price = balance.div(liquidity.divDecimal(BD_18));
+
+      if (
+        price.gt(BD_ONE_TRILLION) &&
+        vault.id.toLowerCase() == UNI_V3_WBTC_WETH
+      ) {
+        return price.div(pow(BD_TEN, 3));
+      }
+
+      if (vault.id.toLowerCase() == UNISWAP_V3_CNG_ETH.toLowerCase()) {
+        return price.div(BigDecimal.fromString('2'));
+      }
+
+      if (vault.id.toLowerCase() == UNISWAP_V3_DAI_USDC.toLowerCase()) {
+        return price.div(BigDecimal.fromString('80'));
+      }
+
+      if (vault.id.toLowerCase() == UNISWAP_V3_STETH_WETH.toLowerCase()) {
+        return price.times(BigDecimal.fromString('2'));
+      }
+
+      return price;
+    } catch (e) {
+      return BigDecimal.zero();
     }
-    if (vault.id == UNISWAP_V3_CNG_ETH) {
-      return price.div(BigDecimal.fromString('2'));
-    }
-    if (vault.id == UNISWAP_V3_DAI_USDC) {
-      return price.div(BigDecimal.fromString('80'));
-    }
-    if (vault.id.toLowerCase() == UNISWAP_V3_STETH_WETH) {
-      return price.times(BigDecimal.fromString('2'));
-    }
-    return price;
   }
-
-  return BigDecimal.zero()
+  return BigDecimal.zero();
 }
 
 export function getPriceForCurve(underlyingAddress: string, block: number): BigDecimal {

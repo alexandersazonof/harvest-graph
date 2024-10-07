@@ -1,6 +1,6 @@
 import { describe, test, assert, createMockedFunction } from "matchstick-as/assembly/index";
 import {
-  getPriceForBalancer,
+  getPriceForBalancer, getPriceForCoin,
   getPriceForCurve,
   getPriceForUniswapV3,
 } from '../../src/utils/PriceUtils';
@@ -355,6 +355,153 @@ describe('Get price for uniswapV3', () => {
     log.log(log.Level.INFO, `price = ${price}`)
     assert.assertTrue(price.equals(BigDecimal.fromString('3.171155196301447938887288055602062')))
   })
+
+  test('getPriceForCoin returns correct price for stable coin', () => {
+    const address = Address.fromString('0x123');
+    const block = 123;
+
+    // Mocking the getOracleAddress function
+    createMockedFunction(address, 'getOracleAddress', 'getOracleAddress(uint256):(address)')
+      .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(block))])
+      .returns([ethereum.Value.fromAddress(Address.fromString('0x456'))]);
+
+    // Mocking the OracleContract's try_getPrice function
+    createMockedFunction(Address.fromString('0x456'), 'try_getPrice', 'try_getPrice(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(Address.fromString('0x789'))])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(1000))]);
+
+    const price = getPriceForCoin(address, block);
+    assert.assertTrue(price.equals(BigInt.fromI32(1000)));
+  });
+
+  test('getPriceForCurve returns correct price', () => {
+    const address = '0xc4AD29ba4B3c580e6D59105FFf484999997675Ff';
+    const contractAddress = Address.fromString(address);
+    const minterAddress = '0xD51a44d3FaE010294C616388b506AcdA1bfAAE46';
+    const minterContract = Address.fromString(minterAddress);
+
+    createMockedFunction(contractAddress, 'minter', 'minter():(address)')
+      .returns([ethereum.Value.fromAddress(minterContract)]);
+
+    createMockedFunction(contractAddress, 'totalSupply', 'totalSupply():(uint256)')
+      .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString('170072949681759705845857'))]);
+
+    createMockedFunction(minterContract, 'coins', 'coins(uint256):(address)')
+      .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(0))])
+      .returns([ethereum.Value.fromAddress(Address.fromString('0x0000000000000000000000000000000000000001'))]);
+
+    createMockedFunction(ORACLE_ADDRESS_MAINNET_SECOND, 'getPrice', 'getPrice(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(Address.fromString('0x0000000000000000000000000000000000000001'))])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromI64(996884286937131371))]);
+
+    createMockedFunction(Address.fromString('0x0000000000000000000000000000000000000001'), 'decimals', 'decimals():(uint8)')
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(6))]);
+
+    createMockedFunction(minterContract, 'balances', 'balances(uint256):(uint256)')
+      .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(0))])
+      .returns([ethereum.Value.fromSignedBigInt(BigInt.fromI64(47861987269296))]);
+
+    const block = 15996940;
+    const price = getPriceForCurve(address, block);
+    assert.assertTrue(price.equals(BigDecimal.fromString('839.2321169157461488772447420326583')));
+  });
+
+  test('getPriceForBalancer returns correct price', () => {
+    const underlyingAddress = '0x76FCf0e8C7Ff37A47a799FA2cd4c13cDe0D981C9';
+    const underlying = Address.fromString(underlyingAddress);
+    const poolId = '0x76fcf0e8c7ff37a47a799fa2cd4c13cde0d981c90002000000000000000003d2';
+    const vaultAddress = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
+    const vault = Address.fromString(vaultAddress);
+    const tokenAAddress = '0x64aa3364F17a4D01c6f1751Fd97C2BD3D7e7f1D5';
+    const tokenBAddress = '0x6b175474e89094c44da98b954eedeac495271d0f';
+    const tokenA = Address.fromString(tokenAAddress);
+    const tokenB = Address.fromString(tokenBAddress);
+    const tokenPriceA = BigInt.fromString('10000000000000000000');
+    const totalSupply = BigInt.fromString('9862770382717783664004258');
+    const oracle = ORACLE_ADDRESS_MAINNET_SECOND;
+
+    createMockedFunction(underlying, 'getPoolId', 'getPoolId():(bytes32)')
+      .returns([ethereum.Value.fromBytes(Bytes.fromHexString(poolId))]);
+
+    createMockedFunction(underlying, 'totalSupply', 'totalSupply():(uint256)')
+      .returns([ethereum.Value.fromSignedBigInt(totalSupply)]);
+
+    createMockedFunction(underlying, 'getVault', 'getVault():(address)')
+      .returns([ethereum.Value.fromAddress(vault)]);
+
+    createMockedFunction(vault, 'getPoolTokens', 'getPoolTokens(bytes32):(address[],uint256[],uint256)')
+      .withArgs([ethereum.Value.fromFixedBytes(Bytes.fromHexString(poolId))])
+      .returns([
+        ethereum.Value.fromAddressArray([tokenA, tokenB]),
+        ethereum.Value.fromSignedBigIntArray([
+          BigInt.fromString('1526606115791016'),
+          BigInt.fromString('16010314391173360071299886')
+        ]),
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('17307159'))
+      ]);
+
+    createMockedFunction(oracle, 'getPrice', 'getPrice(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(tokenA)])
+      .returns([ethereum.Value.fromUnsignedBigInt(tokenPriceA)]);
+
+    createMockedFunction(tokenA, 'decimals', 'decimals():(uint8)')
+      .returns([ethereum.Value.fromI32(9)]);
+    createMockedFunction(tokenB, 'decimals', 'decimals():(uint8)')
+      .returns([ethereum.Value.fromI32(18)]);
+
+    const price = getPriceForBalancer(underlyingAddress, 17279698);
+    assert.assertTrue(price.equals(BigDecimal.fromString('3.171155196301447938887288055602062')));
+  });
+
+  test('getPriceForUniswapV3 returns correct price', () => {
+    const uniswapPool = Address.fromString('0xd43b29aaf8ad938cff4f478a0756defffb329d07');
+    const tokenA = Address.fromString('0x662b67d00a13faf93254714dd601f5ed49ef2f51');
+    const tokenB = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2');
+    const block = 999999999;
+    const vault = new Vault('');
+    vault.symbol = 'fUniV3_ORC_WETH';
+
+    const uniswaPoolEntity = new UniswapV3Pool('orc-weth-3000');
+    uniswaPoolEntity.pool = uniswapPool.toHex();
+    uniswaPoolEntity.tokenA = tokenA.toHex();
+    uniswaPoolEntity.tokenB = tokenB.toHex();
+    uniswaPoolEntity.createAtBlock = BigInt.fromString('7787878');
+    uniswaPoolEntity.timestamp = BigInt.fromString('789798');
+    uniswaPoolEntity.save();
+
+    createMockedFunction(uniswapPool, 'liquidity', 'liquidity():(uint128)')
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('56213242337321632152637'))]);
+
+    createMockedFunction(uniswapPool, 'token0', 'token0():(address)')
+      .returns([ethereum.Value.fromAddress(tokenA)]);
+    createMockedFunction(uniswapPool, 'token1', 'token1():(address)')
+      .returns([ethereum.Value.fromAddress(tokenB)]);
+
+    createMockedFunction(tokenA, 'balanceOf', 'balanceOf(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(uniswapPool)])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('6028141645171657933357644'))]);
+    createMockedFunction(tokenB, 'balanceOf', 'balanceOf(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(uniswapPool)])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('441541530971877765189'))]);
+
+    createMockedFunction(tokenA, 'decimals', 'decimals():(uint8)')
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('18'))]);
+    createMockedFunction(tokenB, 'decimals', 'decimals():(uint8)')
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('18'))]);
+
+    createMockedFunction(ORACLE_ADDRESS_MAINNET_SECOND, 'getPrice', 'getPrice(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(tokenA)])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('88708358802578239'))]);
+    createMockedFunction(ORACLE_ADDRESS_MAINNET_SECOND, 'getPrice', 'getPrice(address):(uint256)')
+      .withArgs([ethereum.Value.fromAddress(tokenB)])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1187522443081974814423'))]);
+
+    const result = getPriceForUniswapV3(vault, block);
+    assert.assertTrue(result.equals(BigDecimal.fromString('18.84052556867676493497412934556159')));
+  });
+
+
+
 
   // Mock helper function to simulate contract responses
   function mockPendlePoolReadTokens(pendlePoolAddress: Address, ptAddress: string, syAddress: string): void {
