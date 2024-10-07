@@ -251,65 +251,60 @@ export function getPriceForUniswapV3(vault: Vault, block: number): BigDecimal {
   const poolAddress = getUniswapPoolV3ByVault(vault);
   if (!poolAddress.equals(NULL_ADDRESS)) {
     const pool = UniswapV3PoolContract.bind(poolAddress);
+    const liquidity = pool.liquidity();
+    const token0 = ERC20.bind(pool.token0());
+    const token1 = ERC20.bind(pool.token1());
+    const balanceToken0 = token0.balanceOf(poolAddress);
+    const balanceToken1 = token1.balanceOf(poolAddress);
+    const priceToken0 = getPriceForCoin(token0._address, block);
+    const priceToken1 = getPriceForCoin(token1._address, block);
 
-    try {
-      const liquidity = pool.liquidity();
-      const token0 = ERC20.bind(pool.token0());
-      const token1 = ERC20.bind(pool.token1());
-      const balanceToken0 = token0.balanceOf(poolAddress);
-      const balanceToken1 = token1.balanceOf(poolAddress);
-      const priceToken0 = getPriceForCoin(token0._address, block);
-      const priceToken1 = getPriceForCoin(token1._address, block);
+    const token0Decimals = token0.decimals();
+    const token1Decimals = token1.decimals();
 
-      const token0Decimals = token0.decimals();
-      const token1Decimals = token1.decimals();
-
-      if (
-        priceToken0.isZero() ||
-        liquidity.isZero() ||
-        token0Decimals == 0 ||
-        token1Decimals == 0 ||
-        priceToken1.isZero() ||
-        balanceToken1.isZero() ||
-        balanceToken0.isZero()
-      ) {
-        return BigDecimal.zero();
-      }
-
-      const balance = priceToken0
-        .divDecimal(BD_18)
-        .times(balanceToken0.divDecimal(pow(BD_TEN, token0Decimals)))
-        .plus(
-          priceToken1
-            .divDecimal(BD_18)
-            .times(balanceToken1.divDecimal(pow(BD_TEN, token1Decimals)))
-        );
-
-      let price = balance.div(liquidity.divDecimal(BD_18));
-
-      if (
-        price.gt(BD_ONE_TRILLION) &&
-        vault.id.toLowerCase() == UNI_V3_WBTC_WETH
-      ) {
-        return price.div(pow(BD_TEN, 3));
-      }
-
-      if (vault.id.toLowerCase() == UNISWAP_V3_CNG_ETH.toLowerCase()) {
-        return price.div(BigDecimal.fromString('2'));
-      }
-
-      if (vault.id.toLowerCase() == UNISWAP_V3_DAI_USDC.toLowerCase()) {
-        return price.div(BigDecimal.fromString('80'));
-      }
-
-      if (vault.id.toLowerCase() == UNISWAP_V3_STETH_WETH.toLowerCase()) {
-        return price.times(BigDecimal.fromString('2'));
-      }
-
-      return price;
-    } catch (e) {
+    if (
+      priceToken0.isZero() ||
+      liquidity.isZero() ||
+      token0Decimals == 0 ||
+      token1Decimals == 0 ||
+      priceToken1.isZero() ||
+      balanceToken1.isZero() ||
+      balanceToken0.isZero()
+    ) {
       return BigDecimal.zero();
     }
+
+    const balance = priceToken0
+      .divDecimal(BD_18)
+      .times(balanceToken0.divDecimal(pow(BD_TEN, token0Decimals)))
+      .plus(
+        priceToken1
+          .divDecimal(BD_18)
+          .times(balanceToken1.divDecimal(pow(BD_TEN, token1Decimals)))
+      );
+
+    let price = balance.div(liquidity.divDecimal(BD_18));
+
+    if (
+      price.gt(BD_ONE_TRILLION) &&
+      vault.id.toLowerCase() == UNI_V3_WBTC_WETH
+    ) {
+      return price.div(pow(BD_TEN, 3));
+    }
+
+    if (vault.id.toLowerCase() == UNISWAP_V3_CNG_ETH.toLowerCase()) {
+      return price.div(BigDecimal.fromString('2'));
+    }
+
+    if (vault.id.toLowerCase() == UNISWAP_V3_DAI_USDC.toLowerCase()) {
+      return price.div(BigDecimal.fromString('80'));
+    }
+
+    if (vault.id.toLowerCase() == UNISWAP_V3_STETH_WETH.toLowerCase()) {
+      return price.times(BigDecimal.fromString('2'));
+    }
+
+    return price;
   }
   return BigDecimal.zero();
 }
