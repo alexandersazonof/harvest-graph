@@ -31,17 +31,16 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
 
   const vault = Vault.load(vaultAddress)
   if (vault != null) {
-    if (sharePrice.oldSharePrice != sharePrice.newSharePrice) {
-      const lastShareTimestamp = vault.lastShareTimestamp
-      if (!lastShareTimestamp.isZero()) {
-        const diffSharePrice = sharePrice.newSharePrice.minus(sharePrice.oldSharePrice).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
-        const diffTimestamp = timestamp.minus(lastShareTimestamp)
-        const apy = calculateAndSaveApyAutoCompound(`${event.transaction.hash.toHex()}-${vaultAddress}`, diffSharePrice, diffTimestamp, vault, event.block)
-      }
-      vault.lastShareTimestamp = sharePrice.timestamp
-      vault.lastSharePrice = sharePrice.newSharePrice
-      vault.save()
+    const lastShareTimestamp = vault.lastShareTimestamp
+    const lastSharePrice = vault.lastSharePrice;
+    if (!lastShareTimestamp.isZero()) {
+      const diffSharePrice = sharePrice.newSharePrice.minus(lastSharePrice).divDecimal(pow(BD_TEN, vault.decimal.toI32()))
+      const diffTimestamp = timestamp.minus(lastShareTimestamp)
+      const apy = calculateAndSaveApyAutoCompound(`${event.transaction.hash.toHex()}-${vaultAddress}`, diffSharePrice, diffTimestamp, vault, event.block)
     }
+    vault.lastShareTimestamp = sharePrice.timestamp
+    vault.lastSharePrice = sharePrice.newSharePrice
+    vault.save()
 
     const vaultHistoryId = `${event.transaction.hash.toHexString()}-${vaultAddress}`
     let vaultHistory = VaultHistory.load(vaultHistoryId)
