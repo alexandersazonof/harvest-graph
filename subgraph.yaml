@@ -7,7 +7,7 @@ dataSources:
     source:
       abi: StorageContract
       address: "0xc95CbE4ca30055c787CB784BE99D6a8494d0d197"
-      startBlock: 10770072
+      startBlock: 10770074
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
