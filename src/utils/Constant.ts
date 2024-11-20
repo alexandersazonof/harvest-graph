@@ -123,6 +123,8 @@ export const SKIP_TOTAL_TVL = [
   '0x9aa8f427a17d6b0d91b6262989edc7d45d6aedf8',
   // fUniV3_DAI_WETH
   '0x970cc1e0bdb3b29a6a12bde1954a8509acbc9158',
+  // fUniV3_WETH_sETH2
+  '0x65383abd40f9f831018df243287f7ae3612c62ac'
 ]
 
 export const LP_UNI_PAIR_CONTRACT_NAME = [

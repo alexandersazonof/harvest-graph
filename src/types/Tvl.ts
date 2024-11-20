@@ -79,7 +79,7 @@ export function createTvl(address: Address, block: ethereum.Block, transaction: 
       tvl.save()
 
       if (canCalculateTotalTvl(vault.id)) {
-        createTotalTvl(vault.tvl, tvl.value, id, block, vault.id)
+        // createTotalTvl(vault.tvl, tvl.value, id, block, vault.id)
       }
       vault.tvlSequenceId = vault.tvlSequenceId + 1;
       vault.tvl = tvl.value
@@ -125,7 +125,7 @@ export function calculateTvlUsd(vaultAddress: Address, price: BigDecimal, transa
       tvl.save()
 
       if (canCalculateTotalTvl(vault.id)) {
-        createTotalTvl(vault.tvl, tvl.value, id, block, vault.id)
+        // createTotalTvl(vault.tvl, tvl.value, id, block, vault.id)
       }
       vault.tvlSequenceId = vault.tvlSequenceId + 1;
       vault.tvl = tvl.value
@@ -150,6 +150,7 @@ export function totalTvlCount(vault: string): TvlCount {
 }
 
 
+// deprecated
 export function createTotalTvl(oldValue:BigDecimal, newValue: BigDecimal, id: string, block: ethereum.Block, vaultId: string): void {
   const defaultId = '1';
   let totalTvl = TotalTvl.load(defaultId)
