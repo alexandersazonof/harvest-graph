@@ -258,6 +258,8 @@ dataSources:
       eventHandlers:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded
+        - event: RewardPaid(indexed address,uint256)
+          handler: handleRewardPaid
       callHandlers:
         - function: initExclusive(address)
           handler: handleInitExclusive
