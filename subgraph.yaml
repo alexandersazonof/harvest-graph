@@ -255,6 +255,8 @@ dataSources:
           file: ./abis/StrategyBase.json
         - name: PendlePoolContract
           file: ./abis/pendle/PendlePool.json
+        - name: VaultFarmContract
+          file: ./abis/harvest/VaultFarm.json
       eventHandlers:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded

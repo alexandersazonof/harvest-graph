@@ -3,6 +3,6 @@ import { ProfitLogInReward } from '../generated/templates/StrategyListener/Strat
 import { handlerLogic } from './debug/HandlerCalculator';
 
 export function handleProfitLogInReward(event: ProfitLogInReward): void {
-  handlerLogic(event.address.toHexString(), 'ProfitLogInReward', event.transaction, event.block);
+  // handlerLogic(event.address.toHexString(), 'ProfitLogInReward', event.transaction, event.block);
   loadOrCreateLastHarvest(event.address, event.block, event.transaction);
 }

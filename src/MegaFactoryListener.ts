@@ -7,7 +7,7 @@ import { handlerLogic } from './debug/HandlerCalculator';
 
 
 export function handleDeploymentCompleted(event: DeploymentCompleted): void {
-  handlerLogic(event.address.toHexString(), 'DeploymentCompleted', event.transaction, event.block);
+  // handlerLogic(event.address.toHexString(), 'DeploymentCompleted', event.transaction, event.block);
   const id = event.params.id
   const megaFactoryContract = MegaFactoryContract.bind(MEGA_FACTORY_ADDRESS)
   const tryCompletedDeployment = megaFactoryContract.try_completedDeployments(id)

@@ -3,16 +3,17 @@ import { PotPoolContract } from "../generated/templates/PotPoolListener/PotPoolC
 import { saveReward } from "./types/Reward";
 import { saveApyReward } from "./types/Apy";
 import { handlerLogic } from './debug/HandlerCalculator';
-import { BigDecimal, BigInt, Bytes, store } from '@graphprotocol/graph-ts';
+import { Address, BigDecimal, BigInt, Bytes, store } from '@graphprotocol/graph-ts';
 import { RewardPaidEntity, TokenPrice } from '../generated/schema';
 import { loadOrCreatePotPool } from './types/PotPool';
 import { loadOrCreateERC20Token } from './types/Token';
 import { getPriceForCoin } from './utils/PriceUtils';
 import { pow } from './utils/MathUtils';
-import { BD_TEN, BI_EVERY_24_HOURS } from './utils/Constant';
+import { BD_TEN, BI_EVERY_24_HOURS, FARM_TOKEN_MAINNET, I_FARM_TOKEN } from './utils/Constant';
+import { VaultFarmContract } from '../generated/templates/StrategyListener/VaultFarmContract';
 
 export function handleRewardAdded(event: RewardAdded): void {
-  handlerLogic(event.address.toHexString(), 'RewardAdded', event.transaction, event.block);
+  // handlerLogic(event.address.toHexString(), 'RewardAdded', event.transaction, event.block);
   const poolAddress = event.address
   const poolContract = PotPoolContract.bind(poolAddress)
   const rewardToken = poolContract.rewardToken()
@@ -36,13 +37,20 @@ export function handleRewardPaid(event: RewardPaid): void {
   let tokenPrice = TokenPrice.load(tokenPriceId);
   if (tokenPrice == null) {
     tokenPrice = new TokenPrice(tokenPriceId);
-    const price = getPriceForCoin(event.params.rewardToken, event.block.number.toI32());
+    let tokenAdr = Address.fromString(tokenPriceId);
+    let multi = BigDecimal.fromString('1');
+    if (tokenPriceId.toLowerCase() == I_FARM_TOKEN.toHexString().toLowerCase()) {
+      tokenAdr = FARM_TOKEN_MAINNET;
+      multi = pow(VaultFarmContract.bind(I_FARM_TOKEN).getPricePerFullShare().toBigDecimal(), 18);
+    }
+    const price = getPriceForCoin(tokenAdr, event.block.number.toI32());
     let priceBD = BigDecimal.zero();
 
     if (price.gt(BigInt.zero())) {
       priceBD = price.divDecimal(pow(BD_TEN, rewardToken.decimals));
     }
-    tokenPrice.price = priceBD;
+
+    tokenPrice.price = priceBD.times(multi);
     tokenPrice.timestamp = event.block.timestamp;
     tokenPrice.save();
   }

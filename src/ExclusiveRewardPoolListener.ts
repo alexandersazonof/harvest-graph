@@ -17,7 +17,7 @@ import { getPriceForCoin } from './utils/PriceUtils';
 import { pow } from './utils/MathUtils';
 
 export function handleRewardAdded(event: RewardAdded): void {
-  handlerLogic(event.address.toHexString(), 'RewardAdded', event.transaction, event.block);
+  // handlerLogic(event.address.toHexString(), 'RewardAdded', event.transaction, event.block);
   const poolAddress = event.address
   const pool = loadOrCreateExclusiveRewardPool(poolAddress, event.block)
   const vault = loadOrCreateVault(Address.fromString(pool.vault), event.block)

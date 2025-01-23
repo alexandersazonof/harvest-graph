@@ -10,7 +10,7 @@ import { SharePriceChangeTrading } from '../generated/Storage/UniswapV3VaultCont
 import { handlerLogic } from './debug/HandlerCalculator';
 
 export function handleSharePriceChangeLiquidation(event: SharePriceChangeLiquidation): void {
-  handlerLogic(event.address.toHexString(), 'SharePriceChangeLiquidation', event.transaction, event.block);
+  // handlerLogic(event.address.toHexString(), 'SharePriceChangeLiquidation', event.transaction, event.block);
   const address = event.address
   const oldSharePrice = event.params.oldPrice
   const newSharePrice = event.params.newPrice;

@@ -12,7 +12,7 @@ import { handlerLogic } from './debug/HandlerCalculator';
 
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
-  handlerLogic(event.address.toHexString(), 'SharePriceChangeLog', event.transaction, event.block);
+  // handlerLogic(event.address.toHexString(), 'SharePriceChangeLog', event.transaction, event.block);
 
   const vaultAddress = event.params.vault.toHex();
   const strategyAddress = event.params.strategy.toHex();
